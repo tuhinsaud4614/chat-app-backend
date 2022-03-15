@@ -10,6 +10,7 @@ import path from "path";
 import logger from "./logger";
 import { HttpError } from "./models";
 import routes from "./routes";
+import { redisClient } from "./utility";
 require("dotenv").config({
   path: path.join(
     process.cwd(),
@@ -52,13 +53,20 @@ app.use((err: Error, _: Request, res: Response, next: NextFunction) => {
   res.status(500).json(result);
 });
 
-connect(process.env.MONGO_DB_URI || "mongodb://127.0.0.1:27017/chat-app")
-  .then(() => {
-    logger.info(`Database connected successfully.`);
-    app.listen(process.env.PORT || 4000, () => {
-      logger.info(`App is running on ${process.env.PORT || 4000}`);
+app.listen(process.env.PORT || 4000, async () => {
+  logger.info(`App is running on ${process.env.PORT || 4000}.`);
+
+  connect(process.env.MONGO_DB_URI || "mongodb://127.0.0.1:27017/chat-app")
+    .then(() => {
+      logger.info(`Database connected successfully.`);
+    })
+    .catch((er) => {
+      logger.error(`Database connection failed and err is: ${er}.`);
     });
-  })
-  .catch((er) => {
-    logger.error(`Database connection failed and err is: ${er}`);
-  });
+
+  try {
+    await redisClient.connect();
+  } catch (error) {
+    logger.error(`Redis connection failed. ${error}`);
+  }
+});

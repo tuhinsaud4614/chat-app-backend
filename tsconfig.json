@@ -16,7 +16,8 @@
     "rootDir": "./src",
     "moduleResolution": "node",
     "experimentalDecorators": true,
-    "emitDecoratorMetadata": true
+    "emitDecoratorMetadata": true,
+    "strictPropertyInitialization": false
   },
   "include": ["**/*.ts"],
   "exclude": ["node_modules"]

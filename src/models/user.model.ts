@@ -1,14 +1,15 @@
 import {
   DocumentType,
   getModelForClass,
+  index,
   modelOptions,
   pre,
   prop,
   Severity,
 } from "@typegoose/typegoose";
 import { compare, hash } from "bcryptjs";
-import { nanoid } from "nanoid";
 import logger from "../logger";
+import { UserRole } from "../utility";
 
 @pre<User>("save", async function () {
   if (!this.isModified("password")) {
@@ -27,30 +28,28 @@ import logger from "../logger";
     allowMixed: Severity.ALLOW,
   },
 })
+@index({ email: 1 })
 export class User {
   @prop({ default: null })
-  public firstName!: string | null;
+  public firstName: string | null;
 
   @prop({ default: null })
-  public lastName!: string | null;
+  public lastName: string | null;
 
   @prop({ required: true, unique: true })
-  public email!: string;
+  public email: string;
 
   @prop({ required: true })
-  public password!: string;
+  public password: string;
 
-  @prop()
-  public avatar?: string;
+  @prop({ default: null })
+  public avatar: string | null;
 
-  @prop({ required: true, default: () => nanoid() })
-  public verificationCode!: string;
-
-  @prop()
-  public passwordResetCode?: string | null;
+  @prop({ required: true, type: String, enum: UserRole })
+  public role: UserRole;
 
   @prop({ default: false })
-  public active?: boolean;
+  public active: boolean;
 
   async validatePassword(this: DocumentType<User>, newPassword: string) {
     try {

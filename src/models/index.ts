@@ -52,14 +52,14 @@ export class HttpError extends Error {
   }
 }
 
-export class HttpSuccess<T> {
+export class HttpSuccess {
   constructor(
     public message: string,
-    public data: T,
+    public data: any,
     public detail: string | null = null
   ) {}
 
-  toObj(): ISuccessResponse<T> {
+  toObj(): ISuccessResponse {
     return {
       data: this.data,
       detail: this.detail,

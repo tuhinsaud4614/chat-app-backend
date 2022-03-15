@@ -1,7 +1,10 @@
 import { RequestHandler } from "express";
 import { HttpError, HttpSuccess } from "../models";
-import { createUserService } from "../services/user.service";
-import { createUserReqBody } from "../utility/types";
+import {
+  createUserService,
+  sendUserVerificationCode,
+} from "../services/user.service";
+import { createUserReqBody, UserRole } from "../utility/types";
 
 export const createUser: RequestHandler<{}, {}, createUserReqBody> = async (
   req,
@@ -15,11 +18,15 @@ export const createUser: RequestHandler<{}, {}, createUserReqBody> = async (
       lastName,
       password,
       email,
+      role: UserRole.user,
     });
-    const result = new HttpSuccess<string>(
-      "User created successfully",
-      newUser._id as string
-    ).toObj();
+
+    await sendUserVerificationCode(newUser._id as string, email as string);
+
+    const result = new HttpSuccess("User created successfully", {
+      userId: newUser._id,
+    }).toObj();
+
     res.status(201).json(result);
   } catch (error: any) {
     if (error.code === 11000) {
@@ -31,6 +38,10 @@ export const createUser: RequestHandler<{}, {}, createUserReqBody> = async (
         )
       );
     }
+    if (error instanceof HttpError) {
+      return next(error);
+    }
+
     next(
       new HttpError(
         "User creation failed.",

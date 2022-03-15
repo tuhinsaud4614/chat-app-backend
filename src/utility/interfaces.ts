@@ -6,10 +6,10 @@ export interface IErrorResponse {
   timeStamp: string;
 }
 
-export interface ISuccessResponse<T> {
+export interface ISuccessResponse {
   success: boolean;
   detail: string | null;
   message: string;
-  data: T;
+  data: any;
   timeStamp: string;
 }

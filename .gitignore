@@ -1,4 +1,5 @@
 /node_modules
 /dist
 /images
+**/*.DS_Store
 .env
