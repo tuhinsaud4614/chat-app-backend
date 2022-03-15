@@ -4,7 +4,6 @@ import {
   getTestMessageUrl,
   SendMailOptions,
 } from "nodemailer";
-import logger from "../logger";
 import { HttpError } from "../models";
 
 const createDemoAccount = async () => {
@@ -26,8 +25,8 @@ const senMail = async (options: SendMailOptions) => {
     await createDemoAccount();
     const info = await transporter.sendMail(options);
     return getTestMessageUrl(info);
-  } catch (error) {
-    logger.error(error);
+  } catch (error: any) {
+    // logger.error(error.message);
     throw new HttpError("Email not sent.", 500);
   }
 };

@@ -44,3 +44,16 @@ export const createUserValidateSchema = yup.object().shape({
       .oneOf([yup.ref("password"), null], "Password must be matched!"),
   }),
 });
+
+export const resendUserVerificationCodeValidateSchema = yup.object().shape({
+  params: yup.object().shape({
+    id: yup.string().required("User ID is required"),
+  }),
+});
+
+export const userVerifyValidateSchema = yup.object().shape({
+  params: yup.object().shape({
+    id: yup.string().required("User ID is required"),
+    verificationCode: yup.string().required("Verification code is required"),
+  }),
+});

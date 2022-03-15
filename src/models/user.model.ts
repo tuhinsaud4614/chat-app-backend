@@ -49,7 +49,7 @@ export class User {
   public role: UserRole;
 
   @prop({ default: false })
-  public active: boolean;
+  public verify: boolean;
 
   async validatePassword(this: DocumentType<User>, newPassword: string) {
     try {
