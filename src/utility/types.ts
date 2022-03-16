@@ -3,6 +3,7 @@ import { refreshTokenValidateSchema } from "../schema/auth.schema";
 import {
   createUserValidateSchema,
   resendUserVerificationCodeValidateSchema,
+  userForgetPasswordValidateSchema,
   userLoginValidateSchema,
   userVerifyValidateSchema,
 } from "../schema/user.schema";
@@ -30,4 +31,8 @@ export type UserLoginReqBody = yup.TypeOf<
 
 export type RefreshTokenReqBody = yup.TypeOf<
   typeof refreshTokenValidateSchema
+>["body"];
+
+export type UserForgetPasswordReqBody = yup.TypeOf<
+  typeof userForgetPasswordValidateSchema
 >["body"];

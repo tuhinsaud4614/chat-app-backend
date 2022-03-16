@@ -71,3 +71,12 @@ export const userLoginValidateSchema = yup.object().shape({
       .matches(/^[a-zA-Z0-9_.-]*$/, "Invalid email or password."),
   }),
 });
+
+export const userForgetPasswordValidateSchema = yup.object().shape({
+  body: yup.object().shape({
+    email: yup
+      .string()
+      .required("Email is required.")
+      .email("This is not valid email."),
+  }),
+});

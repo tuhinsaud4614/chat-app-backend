@@ -15,25 +15,46 @@ export const findUserByEmail = async (email: string) => {
   return await UserModel.findOne({ email });
 };
 
-export const sendMailToUser = async (
-  id: string,
-  email: string,
+export const userVerificationMessage = (
+  userId: string,
   code: string,
   host?: string
 ) => {
   const link = host
-    ? `<a href="http://${host}/api/v1/user/verify/${id}/${code}">Activation Link</a>`
+    ? `<a href="http://${host}/api/v1/user/verify/${userId}/${code}">Activation Link</a>`
     : "";
 
+  const message = `<b style="color:red;">User ID:</b> ${userId}<b>
+<br/>
+<br/>Verification Code:</b> ${code}
+<br/><br/>${link}
+`;
+  return message;
+};
+
+export const userResetPasswordMessage = (
+  userId: string,
+  code: string,
+  host?: string
+) => {
+  const link = host
+    ? `<a href="http://${host}/api/v1/user/reset-password/${userId}/${code}">Validate Reset Password Link</a>`
+    : "";
+
+  const message = `<b style="color:red;">User ID:</b> ${userId}<b>
+<br/>
+<br/>Reset Code:</b> ${code}
+<br/><br/>${link}
+`;
+  return message;
+};
+
+export const sendMailToUser = async (to: string, message: string) => {
   const info = await sendMail({
     from: "foo@example.com",
-    to: email,
+    to: to,
     subject: "Chat App account verification code",
-    html: `<b style="color:red;">User ID:</b> ${id}<b>
-  <br/>
-  <br/>Verification Code:</b> ${code}
-  <br/><br/>${link}
-  `,
+    html: message,
   });
   logger.info(info);
 };
@@ -44,6 +65,7 @@ export const sendUserVerificationCode = async (
   host?: string
 ) => {
   const verificationCode = nanoid();
+  const message = userVerificationMessage(userId, verificationCode, host);
   await redisClient.set(USER_VERIFICATION_KEY_NAME(userId), verificationCode);
-  await sendMailToUser(userId, email, verificationCode, host);
+  await sendMailToUser(email, message);
 };

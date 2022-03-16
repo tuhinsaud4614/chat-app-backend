@@ -1,17 +1,23 @@
 import { RequestHandler } from "express";
+import { nanoid } from "nanoid";
 import { HttpError, HttpSuccess } from "../models";
 import {
   createUserService,
+  findUserByEmail,
   findUserById,
   sendMailToUser,
   sendUserVerificationCode,
+  userResetPasswordMessage,
+  userVerificationMessage,
 } from "../services/user.service";
 import {
   CreateUserReqBody,
   redisClient,
   ResendVerificationCodeReqParams,
   trimmedObjValue,
+  UserForgetPasswordReqBody,
   UserRole,
+  USER_RESET_PASSWORD_KEY_NAME,
   USER_VERIFICATION_KEY_NAME,
   VerifyUserReqParams,
 } from "../utility";
@@ -91,7 +97,10 @@ export const resendUserActivationLink: RequestHandler<
       return next(er);
     }
 
-    await sendMailToUser(id as string, user.email, redisCode, req.get("host"));
+    const host = req.get("host");
+    const message = userVerificationMessage(id as string, redisCode, host);
+
+    await sendMailToUser(user.email, message);
     res
       .status(200)
       .json(
@@ -137,5 +146,40 @@ export const userVerify: RequestHandler<VerifyUserReqParams> = async (
       .json(new HttpSuccess("User verified successfully", "Succeed").toObj());
   } catch (error) {
     return next(new HttpError("User verification failed", 400));
+  }
+};
+
+export const forgetPassword: RequestHandler<
+  {},
+  {},
+  UserForgetPasswordReqBody
+> = async (req, res, next) => {
+  let { email } = req.body;
+  email = email!.trim();
+
+  try {
+    const user = await findUserByEmail(email);
+
+    if (!user) {
+      return next(new HttpError("User not found!", 404));
+    }
+
+    const resetCode = nanoid();
+    const key = USER_RESET_PASSWORD_KEY_NAME(user._id);
+    await redisClient.set(key, resetCode);
+    redisClient.expire(key, 1800);
+    const host = req.get("host");
+    const message = userResetPasswordMessage(user._id, resetCode, host);
+
+    await sendMailToUser(email, message);
+
+    res
+      .status(200)
+      .json(
+        new HttpSuccess("Send reset password code successfully.", "").toObj()
+      );
+  } catch (err) {
+    console.log("Reset password error & error is", err);
+    return next(new HttpError("Something went wrong!", 500));
   }
 };
