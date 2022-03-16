@@ -57,3 +57,17 @@ export const userVerifyValidateSchema = yup.object().shape({
     verificationCode: yup.string().required("Verification code is required"),
   }),
 });
+
+export const userLoginValidateSchema = yup.object().shape({
+  body: yup.object().shape({
+    email: yup
+      .string()
+      .required("Email is required.")
+      .email("Invalid email or password."),
+    password: yup
+      .string()
+      .required("Password is required.")
+      .min(6, "Invalid email or password.")
+      .matches(/^[a-zA-Z0-9_.-]*$/, "Invalid email or password."),
+  }),
+});

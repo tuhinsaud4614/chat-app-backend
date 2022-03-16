@@ -10,6 +10,7 @@ import {
   CreateUserReqBody,
   redisClient,
   ResendVerificationCodeReqParams,
+  trimmedObjValue,
   UserRole,
   USER_VERIFICATION_KEY_NAME,
   VerifyUserReqParams,
@@ -20,7 +21,8 @@ export const createUser: RequestHandler<{}, {}, CreateUserReqBody> = async (
   res,
   next
 ) => {
-  const { firstName, email, lastName, password } = req.body;
+  const { email, firstName, lastName, password } = trimmedObjValue(req.body);
+
   try {
     const newUser = await createUserService({
       firstName,
@@ -72,15 +74,21 @@ export const resendUserActivationLink: RequestHandler<
   try {
     const user = await findUserById(id as string);
 
-    if (!user || user.verify) {
-      return next(new HttpError("Could not resend verification code.", 400));
+    const er = new HttpError("Could not resend verification code.", 400);
+
+    if (!user) {
+      return next(er);
+    }
+
+    if (user.verified) {
+      return next(new HttpError("User already verified.", 400));
     }
 
     const VRKey = USER_VERIFICATION_KEY_NAME(id as string);
     const redisCode = await redisClient.get(VRKey);
 
     if (!redisCode) {
-      return next(new HttpError("Could not resend verification code.", 400));
+      return next(er);
     }
 
     await sendMailToUser(id as string, user.email, redisCode, req.get("host"));
@@ -108,7 +116,7 @@ export const userVerify: RequestHandler<VerifyUserReqParams> = async (
       return next(new HttpError("User verification failed.", 400));
     }
 
-    if (user.verify) {
+    if (user.verified) {
       return next(new HttpError("User already verified", 409));
     }
 
@@ -120,7 +128,7 @@ export const userVerify: RequestHandler<VerifyUserReqParams> = async (
       return next(new HttpError("User verification failed.", 400));
     }
 
-    user.verify = true;
+    user.verified = true;
     await redisClient.del(VRKey);
     await user.save();
 

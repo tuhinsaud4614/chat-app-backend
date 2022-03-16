@@ -1,7 +1,9 @@
 import * as yup from "yup";
+import { refreshTokenValidateSchema } from "../schema/auth.schema";
 import {
   createUserValidateSchema,
   resendUserVerificationCodeValidateSchema,
+  userLoginValidateSchema,
   userVerifyValidateSchema,
 } from "../schema/user.schema";
 
@@ -21,3 +23,11 @@ export type ResendVerificationCodeReqParams = yup.TypeOf<
 export type VerifyUserReqParams = yup.TypeOf<
   typeof userVerifyValidateSchema
 >["params"];
+
+export type UserLoginReqBody = yup.TypeOf<
+  typeof userLoginValidateSchema
+>["body"];
+
+export type RefreshTokenReqBody = yup.TypeOf<
+  typeof refreshTokenValidateSchema
+>["body"];

@@ -13,3 +13,11 @@ export interface ISuccessResponse {
   data: any;
   timeStamp: string;
 }
+
+export interface IOmitUser {
+  id: string;
+  firstName: string | null;
+  lastName: string | null;
+  email: string;
+  avatar: string | null;
+}
