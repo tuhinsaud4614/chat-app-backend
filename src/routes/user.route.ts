@@ -3,14 +3,17 @@ import {
   createUser,
   forgetPassword,
   resendUserActivationLink,
+  resetPassword,
   userVerify,
+  verifyResetPassword,
 } from "../controllers/user.controller";
 import { validateRequest } from "../middleware";
 import {
   createUserValidateSchema,
   resendUserVerificationCodeValidateSchema,
   userForgetPasswordValidateSchema,
-  userVerifyValidateSchema,
+  userResetPasswordValidateSchema,
+  verifyValidateSchema,
 } from "../schema/user.schema";
 
 const router = Router();
@@ -23,7 +26,7 @@ router.post(
 
 router.get(
   "/verify/:id/:verificationCode",
-  validateRequest(userVerifyValidateSchema, 422),
+  validateRequest(verifyValidateSchema, 422),
   userVerify
 );
 
@@ -37,6 +40,18 @@ router.post(
   "/forget-password",
   validateRequest(userForgetPasswordValidateSchema, 422),
   forgetPassword
+);
+
+router.get(
+  "/verify-reset-password/:id/:verificationCode",
+  validateRequest(verifyValidateSchema, 422),
+  verifyResetPassword
+);
+
+router.post(
+  "/reset-password/:id/:verifiedCode",
+  validateRequest(userResetPasswordValidateSchema, 422),
+  resetPassword
 );
 
 export default router;

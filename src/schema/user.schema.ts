@@ -51,10 +51,10 @@ export const resendUserVerificationCodeValidateSchema = yup.object().shape({
   }),
 });
 
-export const userVerifyValidateSchema = yup.object().shape({
+export const verifyValidateSchema = yup.object().shape({
   params: yup.object().shape({
-    id: yup.string().required("User ID is required"),
-    verificationCode: yup.string().required("Verification code is required"),
+    id: yup.string(),
+    verificationCode: yup.string(),
   }),
 });
 
@@ -78,5 +78,29 @@ export const userForgetPasswordValidateSchema = yup.object().shape({
       .string()
       .required("Email is required.")
       .email("This is not valid email."),
+  }),
+});
+
+export const userResetPasswordValidateSchema = yup.object().shape({
+  body: yup.object().shape({
+    newPassword: yup
+      .string()
+      .trim()
+      .required("Password is required.")
+      .min(6, "Password should at least 6 characters.")
+      .matches(/^[a-zA-Z0-9_.-]*$/, "Password can only contain latin letters.")
+      .test(
+        "sanitize",
+        "Malicious password entered.",
+        (value) => !!value && !!sanitizeHtml(value)
+      ),
+    confirmNewPassword: yup
+      .string()
+      .required("Confirm password is required.")
+      .oneOf([yup.ref("newPassword"), null], "Password must be matched!"),
+  }),
+  params: yup.object().shape({
+    id: yup.string(),
+    verifiedCode: yup.string(),
   }),
 });

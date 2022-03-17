@@ -1,7 +1,9 @@
 export * from "./constants";
+export * from "./enums";
 export * from "./interfaces";
 export { default as sendMail } from "./mailer";
 export * from "./redis";
+export { default as SocketIO } from "./socketIO";
 export * from "./types";
 
 export function trimmedObjValue<T extends Object>(obj: T) {

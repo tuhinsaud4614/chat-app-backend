@@ -5,12 +5,13 @@ import express, {
   Response,
   urlencoded,
 } from "express";
+import { createServer } from "http";
 import { connect } from "mongoose";
 import path from "path";
 import logger from "./logger";
 import { HttpError } from "./models";
 import routes from "./routes";
-import { redisClient } from "./utility";
+import { redisClient, SocketIO } from "./utility";
 require("dotenv").config({
   path: path.join(
     process.cwd(),
@@ -19,6 +20,14 @@ require("dotenv").config({
 });
 
 const app = express();
+const httpServer = createServer(app);
+const socket = SocketIO.getInstance(httpServer);
+socket.on("connection", (socket) => {
+  logger.info("Socket connected successfully.");
+  socket.on("disconnect", () => {
+    logger.warn("Socket is disconnected.");
+  });
+});
 
 app.use(express.static(path.join(process.cwd(), "images")));
 app.use(json());
@@ -53,7 +62,7 @@ app.use((err: Error, _: Request, res: Response, next: NextFunction) => {
   res.status(500).json(result);
 });
 
-app.listen(process.env.PORT || 4000, async () => {
+httpServer.listen(process.env.PORT || 4000, async () => {
   logger.info(`App is running on ${process.env.PORT || 4000}.`);
 
   connect(process.env.MONGO_DB_URI || "mongodb://127.0.0.1:27017/chat-app")

@@ -5,7 +5,8 @@ import {
   resendUserVerificationCodeValidateSchema,
   userForgetPasswordValidateSchema,
   userLoginValidateSchema,
-  userVerifyValidateSchema,
+  userResetPasswordValidateSchema,
+  verifyValidateSchema,
 } from "../schema/user.schema";
 
 export enum UserRole {
@@ -21,8 +22,8 @@ export type ResendVerificationCodeReqParams = yup.TypeOf<
   typeof resendUserVerificationCodeValidateSchema
 >["params"];
 
-export type VerifyUserReqParams = yup.TypeOf<
-  typeof userVerifyValidateSchema
+export type verifyValidateReqParams = yup.TypeOf<
+  typeof verifyValidateSchema
 >["params"];
 
 export type UserLoginReqBody = yup.TypeOf<
@@ -36,3 +37,11 @@ export type RefreshTokenReqBody = yup.TypeOf<
 export type UserForgetPasswordReqBody = yup.TypeOf<
   typeof userForgetPasswordValidateSchema
 >["body"];
+
+export type UserResetPasswordReqBody = yup.TypeOf<
+  typeof userResetPasswordValidateSchema
+>["body"];
+
+export type UserResetPasswordReqParams = yup.TypeOf<
+  typeof userResetPasswordValidateSchema
+>["params"];

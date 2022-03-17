@@ -38,7 +38,7 @@ export const userResetPasswordMessage = (
   host?: string
 ) => {
   const link = host
-    ? `<a href="http://${host}/api/v1/user/reset-password/${userId}/${code}">Validate Reset Password Link</a>`
+    ? `<a href="http://${host}/api/v1/user/verify-reset-password/${userId}/${code}">Validate Reset Password Link</a>`
     : "";
 
   const message = `<b style="color:red;">User ID:</b> ${userId}<b>
