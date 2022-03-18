@@ -89,23 +89,90 @@
           }
         }
       }
+    },
+    "/api/v1/user/verify/{id}/{verificationCode}": {
+      "get": {
+        "tags": ["User"],
+        "summary": "Verify the new user.",
+        "description": "This will verify the new user.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "The user id of a new user",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "verificationCode",
+            "description": "The verification code of new user.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful.",
+            "schema": {
+              "allOf": [
+                { "$ref": "#/definitions/Success" },
+                {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "string",
+                      "default": ""
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "Failed",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "409": {
+            "description": "Conflict with requirement",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "422": {
+            "description": "Invalid inputs",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
     }
   },
   "definitions": {
     "User": {
       "type": "object",
-      "properties": {}
-    },
-    "Image": {
-      "type": "object",
       "properties": {
-        "name": { "type": "string" },
-        "ext": { "type": "string" },
-        "uri": { "type": "string" },
-        "baseName": { "type": "string", "enum": ["main", "sm", "md", "lg"] },
-        "_id": { "type": "string" }
+        "id": { "type": "string" },
+        "firstName": { "type": "string", "default": null },
+        "lastName": { "type": "string", "default": null },
+        "email": { "type": "string" },
+        "avatar": { "type": "string", "default": null }
       }
     },
+
     "Error": {
       "type": "object",
       "properties": {
@@ -126,22 +193,6 @@
         "message": { "type": "string" },
         "success": { "type": "boolean", "default": true },
         "timeStamp": { "type": "string", "format": "date-time" }
-      }
-    },
-    "Category": {
-      "type": "object",
-      "properties": {
-        "_id": { "type": "string" },
-        "title": { "type": "string" },
-        "slug": { "type": "string" },
-        "image": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/Image"
-          }
-        },
-        "createdAt": { "type": "string", "format": "date-time" },
-        "updatedAt": { "type": "string", "format": "date-time" }
       }
     }
   }
