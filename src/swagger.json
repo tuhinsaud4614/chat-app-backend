@@ -159,6 +159,67 @@
           }
         }
       }
+    },
+    "/api/v1/user/resend-verification-code/{id}": {
+      "get": {
+        "tags": ["User"],
+        "summary": "Resend the verification code.",
+        "description": "This will resend the verification code.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "The user id of newly created user",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful.",
+            "schema": {
+              "allOf": [
+                { "$ref": "#/definitions/Success" },
+                {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "string",
+                      "default": ""
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "Failed",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "409": {
+            "description": "Conflict with requirement",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "422": {
+            "description": "Invalid inputs",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
     }
   },
   "definitions": {

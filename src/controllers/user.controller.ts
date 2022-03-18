@@ -92,7 +92,7 @@ export const resendUserActivationLink: RequestHandler<
     }
 
     if (user.verified) {
-      return next(new HttpError("User already verified.", 400));
+      return next(new HttpError("User already verified.", 409));
     }
 
     const VRKey = USER_VERIFICATION_KEY_NAME(id as string);
