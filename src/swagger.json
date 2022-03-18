@@ -1,0 +1,148 @@
+{
+  "apiVersion": "1.0.0",
+  "swagger": "2.0",
+  "title": "Chat App",
+  "info": {
+    "title": "Chat App REST API",
+    "description": "This is a Chat App <b>Backend</b> server"
+  },
+  "schemes": ["http", "https"],
+  "tags": [
+    {
+      "name": "User",
+      "description": "Users can control their accounts."
+    }
+  ],
+  "paths": {
+    "/api/v1/user/create": {
+      "post": {
+        "tags": ["User"],
+        "summary": "Create the new user.",
+        "description": "This route will register an account and return user id when its created successfully.",
+        "consumes": "application/json",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "User",
+            "description": "User data to register an account",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "firstName": {
+                  "type": "string"
+                },
+                "lastName": {
+                  "type": "string"
+                },
+                "email": {
+                  "type": "string"
+                },
+                "password": {
+                  "type": "string"
+                },
+                "confirmPassword": {
+                  "type": "string"
+                }
+              },
+              "required": ["email", "password", "confirmPassword"]
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Successful operation.",
+            "schema": {
+              "allOf": [
+                { "$ref": "#/definitions/Success" },
+                {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "userId": { "type": "string" }
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "409": {
+            "description": "Conflict with requirement",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "422": {
+            "description": "Invalid inputs",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "User": {
+      "type": "object",
+      "properties": {}
+    },
+    "Image": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "ext": { "type": "string" },
+        "uri": { "type": "string" },
+        "baseName": { "type": "string", "enum": ["main", "sm", "md", "lg"] },
+        "_id": { "type": "string" }
+      }
+    },
+    "Error": {
+      "type": "object",
+      "properties": {
+        "detail": { "type": "string", "default": null },
+        "message": { "type": "string" },
+        "error": { "type": "string" },
+        "success": { "type": "boolean", "default": false },
+        "timeStamp": { "type": "string", "format": "date-time" }
+      }
+    },
+    "Success": {
+      "type": "object",
+      "properties": {
+        "detail": {
+          "type": "string",
+          "default": null
+        },
+        "message": { "type": "string" },
+        "success": { "type": "boolean", "default": true },
+        "timeStamp": { "type": "string", "format": "date-time" }
+      }
+    },
+    "Category": {
+      "type": "object",
+      "properties": {
+        "_id": { "type": "string" },
+        "title": { "type": "string" },
+        "slug": { "type": "string" },
+        "image": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Image"
+          }
+        },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      }
+    }
+  }
+}

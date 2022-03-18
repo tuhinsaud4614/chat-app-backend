@@ -1,3 +1,5 @@
+import compression from "compression";
+import cors from "cors";
 import express, {
   json,
   NextFunction,
@@ -5,12 +7,15 @@ import express, {
   Response,
   urlencoded,
 } from "express";
+import helmet from "helmet";
 import { createServer } from "http";
 import { connect } from "mongoose";
 import path from "path";
+import swagger from "swagger-ui-express";
 import logger from "./logger";
 import { HttpError } from "./models";
 import routes from "./routes";
+import swaggerDocument from "./swagger.json";
 import { redisClient, SocketIO } from "./utility";
 require("dotenv").config({
   path: path.join(
@@ -29,10 +34,14 @@ socket.on("connection", (socket) => {
   });
 });
 
+app.use(helmet());
+app.use(compression());
+app.use(cors());
 app.use(express.static(path.join(process.cwd(), "images")));
 app.use(json());
 app.use(urlencoded({ extended: false }));
 
+app.use("/api-docs", swagger.serve, swagger.setup(swaggerDocument));
 app.use("/api/v1", routes);
 
 // No route found
@@ -78,4 +87,9 @@ httpServer.listen(process.env.PORT || 4000, async () => {
   } catch (error) {
     logger.error(`Redis connection failed. ${error}`);
   }
+});
+
+process.on("SIGTERM", () => {
+  logger.info("SIGTERM received");
+  httpServer.close();
 });
