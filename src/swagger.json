@@ -565,6 +565,66 @@
           }
         }
       }
+    },
+    "/api/v1/auth/logout": {
+      "delete": {
+        "tags": ["Authentication"],
+        "summary": "Logout user.",
+        "description": "This route will logout the user.",
+        "security": [{ "Bearer": [] }],
+        "responses": {
+          "200": {
+            "description": "Successful",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Success"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/AuthorizedUser"
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "403": {
+            "description": "Invalid request",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Not exist",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    }
+  },
+  "securityDefinitions": {
+    "Bearer": {
+      "type": "apiKey",
+      "name": "Authorization",
+      "in": "header"
     }
   },
   "definitions": {
