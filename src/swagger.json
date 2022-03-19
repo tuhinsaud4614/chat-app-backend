@@ -220,6 +220,132 @@
           }
         }
       }
+    },
+    "/api/v1/user/forget-password": {
+      "post": {
+        "tags": ["User"],
+        "summary": "Forgot password.",
+        "description": "This will send a code to reset password through email.",
+        "consumes": "application/json",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "email",
+            "description": "The user email who already verified",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful",
+            "schema": {
+              "allOf": [
+                { "$ref": "#/definitions/Success" },
+                {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "string",
+                      "default": ""
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "404": {
+            "description": "Not exist",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "422": {
+            "description": "Invalid inputs",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/user/verify-reset-password/{id}/{verificationCode}": {
+      "get": {
+        "tags": ["User"],
+        "summary": "Verify the code to reset password.",
+        "description": "This will verify the code send through email to reset password.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "The user id of the user",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "verificationCode",
+            "description": "The reset password verification code",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful.",
+            "schema": {
+              "allOf": [
+                { "$ref": "#/definitions/Success" },
+                {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "string",
+                      "default": ""
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "Failed",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "409": {
+            "description": "Conflict with requirement",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "422": {
+            "description": "Invalid inputs",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
     }
   },
   "definitions": {
