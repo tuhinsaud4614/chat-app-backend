@@ -94,7 +94,7 @@ export const userResetPasswordValidateSchema = yup.object().shape({
         "Malicious password entered.",
         (value) => !!value && !!sanitizeHtml(value)
       ),
-    confirmNewPassword: yup
+    confirmPassword: yup
       .string()
       .required("Confirm password is required.")
       .oneOf([yup.ref("newPassword"), null], "Password must be matched!"),

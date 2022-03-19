@@ -346,6 +346,94 @@
           }
         }
       }
+    },
+    "/api/v1/user/reset-password/{id}/{verifiedCode}": {
+      "post": {
+        "tags": ["User"],
+        "summary": "Set the new password.",
+        "description": "This will set a new password for the existed user.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "The user id of the user",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "verifiedCode",
+            "description": "The verified code to set new password",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "body",
+            "name": "New password",
+            "description": "New password for the user",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "newPassword": {
+                  "type": "string"
+                },
+                "confirmPassword": {
+                  "type": "string"
+                }
+              },
+              "required": ["newPassword", "confirmPassword"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful.",
+            "schema": {
+              "allOf": [
+                { "$ref": "#/definitions/Success" },
+                {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "string",
+                      "default": ""
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "Failed",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "409": {
+            "description": "Conflict with requirement",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "422": {
+            "description": "Invalid inputs",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
     }
   },
   "definitions": {
