@@ -1,7 +1,7 @@
 import { RequestHandler } from "express";
 import { HttpError, HttpSuccess } from "../models";
 import { generateToken } from "../services/auth.service";
-import { findUserByEmail } from "../services/user.service";
+import { findUserByEmail, findUserById } from "../services/user.service";
 import {
   IOmitUser,
   redisClient,
@@ -67,6 +67,12 @@ export const getNewTokens: RequestHandler = async (req, res, next) => {
   try {
     // @ts-ignore
     const user = req.user as IOmitUser;
+
+    const isExist = await findUserById(user.id);
+
+    if (!isExist) {
+      return next(new HttpError("User not exist.", 404));
+    }
 
     const accessToken = await generateToken(
       user,
