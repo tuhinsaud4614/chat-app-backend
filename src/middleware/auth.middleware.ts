@@ -2,7 +2,12 @@ import { RequestHandler } from "express";
 import { verify } from "jsonwebtoken";
 import logger from "../logger";
 import { HttpError } from "../models";
-import { IOmitUser, redisClient, RefreshTokenReqBody } from "../utility";
+import {
+  IOmitUser,
+  redisClient,
+  RefreshTokenReqBody,
+  REFRESH_TOKEN_KEY_NAME,
+} from "../utility";
 
 export const verifyRefreshToken: RequestHandler<
   {},
@@ -15,7 +20,9 @@ export const verifyRefreshToken: RequestHandler<
     const decoded = verify(token!, process.env.REFRESH_TOKEN_SECRET_KEY!);
 
     if (typeof decoded === "object" && "id" in decoded) {
-      const value = await redisClient.get(decoded["id"]);
+      const value = await redisClient.get(
+        REFRESH_TOKEN_KEY_NAME(decoded["id"])
+      );
       if (value && token === JSON.parse(value)) {
         // @ts-ignore
         req.user = {
@@ -36,7 +43,7 @@ export const verifyRefreshToken: RequestHandler<
   }
 };
 
-export const verifyAccessToken: RequestHandler = (req, _, next) => {
+export const verifyAccessToken: RequestHandler = async (req, _, next) => {
   if (!req.headers.authorization) {
     return next(new HttpError("Invalid request.", 403));
   }
@@ -52,8 +59,8 @@ export const verifyAccessToken: RequestHandler = (req, _, next) => {
       return next();
     }
 
-    return next(new HttpError("Authentication failed.", 403));
+    return next(new HttpError("You are not authorized.", 403));
   } catch (error) {
-    return next(new HttpError("Authentication failed.", 403));
+    return next(new HttpError("You are not authorized.", 403));
   }
 };

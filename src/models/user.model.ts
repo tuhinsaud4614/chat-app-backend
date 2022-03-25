@@ -9,7 +9,55 @@ import {
 } from "@typegoose/typegoose";
 import { compare, hash } from "bcryptjs";
 import logger from "../logger";
-import { UserRole } from "../utility";
+import { IExtendedImage, UserRole } from "../utility";
+
+// class Image {
+//   @prop({ required: true })
+//   originalName: string;
+
+//   @prop({ required: true })
+//   webpName: string;
+
+//   @prop({ required: true })
+//   originalUrl: string;
+
+//   @prop({ required: true })
+//   webpUrl: string;
+
+//   @prop({ required: true })
+//   width: number;
+
+//   @prop({ required: true })
+//   height: number;
+// }
+
+// class Avatar {
+//   @prop({ ref: () => Image })
+//   public main: Ref<Image>;
+
+//   @prop({ ref: () => Image })
+//   public 640: Ref<Image>;
+
+//   @prop({ ref: () => Image })
+//   public 750: Ref<Image>;
+//   @prop({ ref: () => Image })
+//   public 828: Ref<Image>;
+
+//   @prop({ ref: () => Image })
+//   public 1080: Ref<Image>;
+
+//   @prop({ ref: () => Image })
+//   public 1200: Ref<Image>;
+
+//   @prop({ ref: () => Image })
+//   public 1920: Ref<Image>;
+
+//   @prop({ ref: () => Image })
+//   public 2048: Ref<Image>;
+
+//   @prop({ ref: () => Image })
+//   public 3840: Ref<Image>;
+// }
 
 @pre<User>("save", async function () {
   if (!this.isModified("password")) {
@@ -43,7 +91,7 @@ export class User {
   public password: string;
 
   @prop({ default: null })
-  public avatar: string | null;
+  public avatar: null | IExtendedImage;
 
   @prop({ required: true, type: String, enum: UserRole })
   public role: UserRole;

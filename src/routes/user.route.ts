@@ -4,17 +4,22 @@ import {
   forgetPassword,
   resendUserActivationLink,
   resetPassword,
+  uploadAvatar,
   userVerify,
   verifyResetPassword,
 } from "../controllers/user.controller";
 import { validateRequest } from "../middleware";
+import { verifyAccessToken } from "../middleware/auth.middleware";
+import { imageUpload } from "../middleware/file.middleware";
 import {
   createUserValidateSchema,
   resendUserVerificationCodeValidateSchema,
   userForgetPasswordValidateSchema,
+  userProfileValidateSchema,
   userResetPasswordValidateSchema,
   verifyValidateSchema,
 } from "../schema/user.schema";
+import { maxFileSize } from "../utility";
 
 const router = Router();
 
@@ -54,4 +59,11 @@ router.post(
   resetPassword
 );
 
+router.patch(
+  "/profile",
+  verifyAccessToken,
+  imageUpload(undefined, maxFileSize(5)).single("avatar"),
+  validateRequest(userProfileValidateSchema, 422),
+  uploadAvatar
+);
 export default router;

@@ -8,11 +8,14 @@ import {
   userResetPasswordValidateSchema,
   verifyValidateSchema,
 } from "../schema/user.schema";
+import { IMAGE_MIMES } from "./constants";
 
 export enum UserRole {
   admin = "ADMIN",
   user = "USER",
 }
+
+export type IMAGE_MIME_TYPE = keyof typeof IMAGE_MIMES;
 
 export type CreateUserReqBody = yup.TypeOf<
   typeof createUserValidateSchema

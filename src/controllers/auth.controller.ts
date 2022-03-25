@@ -5,6 +5,7 @@ import { findUserByEmail, findUserById } from "../services/user.service";
 import {
   IOmitUser,
   redisClient,
+  REFRESH_TOKEN_KEY_NAME,
   trimmedObjValue,
   UserLoginReqBody,
 } from "../utility";
@@ -104,13 +105,13 @@ export const logout: RequestHandler = async (req, res, next) => {
     // @ts-ignore
     const { id } = req.user as IOmitUser;
 
-    const redisToken = await redisClient.get(id);
+    const redisToken = await redisClient.get(REFRESH_TOKEN_KEY_NAME(id));
 
     if (!redisToken) {
       return next(new HttpError("Already logged out.", 400));
     }
 
-    await redisClient.del(id);
+    await redisClient.del(REFRESH_TOKEN_KEY_NAME(id));
 
     const result = new HttpSuccess("Logout successfully.", "").toObj();
     return res.status(200).json(result);

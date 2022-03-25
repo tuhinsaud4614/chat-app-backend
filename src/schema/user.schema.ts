@@ -104,3 +104,7 @@ export const userResetPasswordValidateSchema = yup.object().shape({
     verifiedCode: yup.string(),
   }),
 });
+
+export const userProfileValidateSchema = yup.object().shape({
+  file: yup.mixed().required("Avatar is required"),
+});

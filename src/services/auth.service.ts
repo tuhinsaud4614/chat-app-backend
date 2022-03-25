@@ -1,5 +1,5 @@
 import { sign as jwtSign } from "jsonwebtoken";
-import { IOmitUser, redisClient } from "../utility";
+import { IOmitUser, redisClient, REFRESH_TOKEN_KEY_NAME } from "../utility";
 
 export const generateToken = async (
   user: IOmitUser,
@@ -12,7 +12,10 @@ export const generateToken = async (
   });
 
   if (settable) {
-    await redisClient.set(user.id, JSON.stringify(refresh_token));
+    await redisClient.set(
+      REFRESH_TOKEN_KEY_NAME(user.id),
+      JSON.stringify(refresh_token)
+    );
   }
   return refresh_token;
 };

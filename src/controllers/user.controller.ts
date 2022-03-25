@@ -1,6 +1,9 @@
 import { RequestHandler } from "express";
+import _ from "lodash";
 import { nanoid } from "nanoid";
+import path from "path";
 import { HttpError, HttpSuccess } from "../models";
+import { generateImages } from "../services/common.service";
 import {
   createUserService,
   findUserByEmail,
@@ -14,6 +17,7 @@ import {
   CreateUserReqBody,
   ESocketEvents,
   redisClient,
+  removeDir,
   ResendVerificationCodeReqParams,
   SocketIO,
   trimmedObjValue,
@@ -171,8 +175,7 @@ export const forgetPassword: RequestHandler<
 
     const resetCode = nanoid();
     const key = USER_RESET_PASSWORD_KEY_NAME(user._id);
-    await redisClient.set(key, resetCode);
-    redisClient.expire(key, 1800);
+    await redisClient.setEx(key, 1800, resetCode);
     const host = req.get("host");
     const message = userResetPasswordMessage(user._id, resetCode, host);
 
@@ -217,8 +220,7 @@ export const verifyResetPassword: RequestHandler<
     const newVerifiedCode = nanoid();
     const newVerifiedKey = USER_RESET_PASSWORD_VERIFIED_KEY_NAME(id as string);
 
-    await redisClient.set(newVerifiedKey, newVerifiedCode);
-    redisClient.expire(newVerifiedKey, 600);
+    await redisClient.setEx(newVerifiedKey, 600, newVerifiedCode);
     await redisClient.del(VRKey);
 
     io.emit(ESocketEvents.VerifyResetPassword, {
@@ -271,5 +273,42 @@ export const resetPassword: RequestHandler<
       .json(new HttpSuccess("Reset password successfully.", "").toObj());
   } catch (error) {
     return next(new HttpError("Reset password failed", 400));
+  }
+};
+
+export const uploadAvatar: RequestHandler = async (req, res, next) => {
+  const file = req.file;
+
+  // @ts-ignore
+  const { id } = req.user as IOmitUser;
+
+  try {
+    const result = await generateImages(file!);
+    const user = await findUserById(id);
+
+    if (!user) {
+      const location = path.join(process.cwd(), "images", result.parentDir);
+      removeDir(location);
+      return next(new HttpError("User not exist", 404));
+    }
+    let previousAvatarDir = "";
+    if (user.avatar) {
+      previousAvatarDir = user.avatar.parentDir;
+    }
+
+    user.avatar = result;
+    await user.save();
+    if (previousAvatarDir) {
+      removeDir(path.join(process.cwd(), "images", previousAvatarDir));
+    }
+
+    res.json(
+      new HttpSuccess("Avatar upload successfully", {
+        id,
+        image: _.omit(user.avatar, "parentDir"),
+      }).toObj()
+    );
+  } catch (error) {
+    next(error);
   }
 };

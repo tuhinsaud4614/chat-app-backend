@@ -13,6 +13,7 @@ import { connect } from "mongoose";
 import path from "path";
 import swagger from "swagger-ui-express";
 import logger from "./logger";
+import { errorHandler } from "./middleware";
 import { HttpError } from "./models";
 import routes from "./routes";
 import swaggerDocument from "./swagger.json";
@@ -37,10 +38,10 @@ socket.on("connection", (socket) => {
 app.use(helmet());
 app.use(compression());
 app.use(cors());
-app.use(express.static(path.join(process.cwd(), "images")));
 app.use(json());
 app.use(urlencoded({ extended: false }));
 
+app.use("/images", express.static(path.join(process.cwd(), "images")));
 app.use("/api-docs", swagger.serve, swagger.setup(swaggerDocument));
 app.use("/api/v1", routes);
 
@@ -50,26 +51,7 @@ app.use((_: Request, __: Response, next: NextFunction) => {
   next(error);
 });
 
-app.use((err: Error, _: Request, res: Response, next: NextFunction) => {
-  if (res.headersSent) {
-    logger.warn("Header already sent");
-    return next(err);
-  }
-
-  if (err instanceof HttpError) {
-    logger.error(err.message);
-    res.status(err.code).json(err.toObj());
-    return;
-  }
-
-  logger.error(err.message);
-  const result = new HttpError(
-    "Something went wrong.",
-    500,
-    "An unknown error occurs."
-  ).toObj();
-  res.status(500).json(result);
-});
+app.use(errorHandler);
 
 httpServer.listen(process.env.PORT || 4000, async () => {
   logger.info(`App is running on ${process.env.PORT || 4000}.`);
