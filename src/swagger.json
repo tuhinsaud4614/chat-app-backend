@@ -439,6 +439,109 @@
         }
       }
     },
+    "/api/v1/user/profile": {
+      "patch": {
+        "tags": ["User"],
+        "summary": "Upload Profile Picture.",
+        "description": "This route will upload the user profile picture.",
+        "security": [{ "Bearer": [] }],
+        "consumes": ["multipart/form-data"],
+        "parameters": [
+          {
+            "in": "formData",
+            "name": "avatar",
+            "description": "The profile picture of the user",
+            "required": true,
+            "type": "file"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Success"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": { "type": "string" },
+                        "image": {
+                          "type": "object",
+                          "properties": {
+                            "main": {
+                              "$ref": "#/definitions/Avatar"
+                            },
+                            "640": {
+                              "$ref": "#/definitions/Avatar"
+                            },
+                            "750": {
+                              "$ref": "#/definitions/Avatar"
+                            },
+                            "828": {
+                              "$ref": "#/definitions/Avatar"
+                            },
+                            "1080": {
+                              "$ref": "#/definitions/Avatar"
+                            },
+                            "1200": {
+                              "$ref": "#/definitions/Avatar"
+                            },
+                            "1920": {
+                              "$ref": "#/definitions/Avatar"
+                            },
+                            "2048": {
+                              "$ref": "#/definitions/Avatar"
+                            },
+                            "3840": {
+                              "$ref": "#/definitions/Avatar"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "403": {
+            "description": "Invalid request",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Not exist",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "422": {
+            "description": "Invalid inputs",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
     "/api/v1/auth/login": {
       "post": {
         "tags": ["Authentication"],
@@ -514,10 +617,18 @@
         "parameters": [
           {
             "in": "body",
-            "name": "token",
-            "description": "User data to login an account",
+            "name": "Refresh Token",
+            "description": "User data to register an account",
             "required": true,
-            "type": "string"
+            "schema": {
+              "type": "object",
+              "properties": {
+                "token": {
+                  "type": "string"
+                }
+              },
+              "required": ["token"]
+            }
           }
         ],
         "responses": {
@@ -638,6 +749,17 @@
         "avatar": { "type": "string", "default": null },
         "accessToken": { "type": "string" },
         "refreshToken": { "type": "string" }
+      }
+    },
+    "Avatar": {
+      "type": "object",
+      "properties": {
+        "originalName": { "type": "string" },
+        "webpName": { "type": "string" },
+        "originalUrl": { "type": "string" },
+        "webpUrl": { "type": "string" },
+        "width": { "type": "number" },
+        "height": { "type": "number" }
       }
     },
     "User": {
