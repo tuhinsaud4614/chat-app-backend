@@ -27,7 +27,7 @@ const senMail = async (options: SendMailOptions) => {
     return getTestMessageUrl(info);
   } catch (error: any) {
     // logger.error(error.message);
-    throw new HttpError("Email not sent.", 500);
+    throw new HttpError("Email not sent", 500);
   }
 };
 

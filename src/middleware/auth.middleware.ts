@@ -31,21 +31,22 @@ export const verifyRefreshToken: RequestHandler<
           email: decoded["email"],
           firstName: decoded["firstName"],
           lastName: decoded["lastName"],
+          role: decoded["role"],
         } as IOmitUser;
         return next();
       }
     }
 
-    return next(new HttpError("Could not refresh the tokens.", 401));
+    return next(new HttpError("Could not refresh the tokens", 401));
   } catch (error) {
     logger.error(error);
-    return next(new HttpError("Something went wrong.", 500));
+    return next(new HttpError("Something went wrong", 500));
   }
 };
 
 export const verifyAccessToken: RequestHandler = async (req, _, next) => {
   if (!req.headers.authorization) {
-    return next(new HttpError("Invalid request.", 403));
+    return next(new HttpError("Invalid request", 403));
   }
 
   const token = req.headers.authorization.replace(/^Bearer\s/, "");
@@ -59,8 +60,8 @@ export const verifyAccessToken: RequestHandler = async (req, _, next) => {
       return next();
     }
 
-    return next(new HttpError("You are not authorized.", 403));
+    return next(new HttpError("You are not authorized", 403));
   } catch (error) {
-    return next(new HttpError("You are not authorized.", 403));
+    return next(new HttpError("You are not authorized", 403));
   }
 };

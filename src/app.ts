@@ -47,7 +47,7 @@ app.use("/api/v1", routes);
 
 // No route found
 app.use((_: Request, __: Response, next: NextFunction) => {
-  const error = new HttpError("Could not found this route.", 404);
+  const error = new HttpError("Could not found this route", 404);
   next(error);
 });
 

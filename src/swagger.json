@@ -234,11 +234,17 @@
         "parameters": [
           {
             "in": "body",
-            "name": "email",
+            "name": "Request Body",
             "description": "The user email who already verified",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "object",
+              "properties": {
+                "email": {
+                  "type": "string"
+                }
+              },
+              "required": ["token"]
             }
           }
         ],
@@ -471,36 +477,7 @@
                       "properties": {
                         "id": { "type": "string" },
                         "image": {
-                          "type": "object",
-                          "properties": {
-                            "main": {
-                              "$ref": "#/definitions/Avatar"
-                            },
-                            "640": {
-                              "$ref": "#/definitions/Avatar"
-                            },
-                            "750": {
-                              "$ref": "#/definitions/Avatar"
-                            },
-                            "828": {
-                              "$ref": "#/definitions/Avatar"
-                            },
-                            "1080": {
-                              "$ref": "#/definitions/Avatar"
-                            },
-                            "1200": {
-                              "$ref": "#/definitions/Avatar"
-                            },
-                            "1920": {
-                              "$ref": "#/definitions/Avatar"
-                            },
-                            "2048": {
-                              "$ref": "#/definitions/Avatar"
-                            },
-                            "3840": {
-                              "$ref": "#/definitions/Avatar"
-                            }
-                          }
+                          "$ref": "#/definitions/ExtendedImage"
                         }
                       }
                     }
@@ -580,7 +557,10 @@
                   "type": "object",
                   "properties": {
                     "data": {
-                      "$ref": "#/definitions/AuthorizedUser"
+                      "allOf": [
+                        { "$ref": "#/definitions/User" },
+                        { "$ref": "#/definitions/Tokens" }
+                      ]
                     }
                   }
                 }
@@ -643,7 +623,7 @@
                   "type": "object",
                   "properties": {
                     "data": {
-                      "$ref": "#/definitions/AuthorizedUser"
+                      "$ref": "#/definitions/Tokens"
                     }
                   }
                 }
@@ -695,7 +675,8 @@
                   "type": "object",
                   "properties": {
                     "data": {
-                      "$ref": "#/definitions/AuthorizedUser"
+                      "type": "string",
+                      "default": ""
                     }
                   }
                 }
@@ -739,19 +720,32 @@
     }
   },
   "definitions": {
-    "AuthorizedUser": {
+    "Tokens": {
+      "type": "object",
+      "properties": {
+        "accessToken": { "type": "string" },
+        "refreshToken": { "type": "string" }
+      }
+    },
+    "User": {
       "type": "object",
       "properties": {
         "id": { "type": "string" },
         "firstName": { "type": "string", "default": null },
         "lastName": { "type": "string", "default": null },
         "email": { "type": "string" },
-        "avatar": { "type": "string", "default": null },
-        "accessToken": { "type": "string" },
-        "refreshToken": { "type": "string" }
+        "avatar": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/ExtendedImage"
+            }
+          ],
+          "nullable": true
+        },
+        "role": { "type": "string" }
       }
     },
-    "Avatar": {
+    "Image": {
       "type": "object",
       "properties": {
         "originalName": { "type": "string" },
@@ -762,14 +756,72 @@
         "height": { "type": "number" }
       }
     },
-    "User": {
+    "ExtendedImage": {
       "type": "object",
       "properties": {
-        "id": { "type": "string" },
-        "firstName": { "type": "string", "default": null },
-        "lastName": { "type": "string", "default": null },
-        "email": { "type": "string" },
-        "avatar": { "type": "string", "default": null }
+        "main": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/Image"
+            }
+          ]
+        },
+        "640": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/Image"
+            }
+          ]
+        },
+        "750": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/Image"
+            }
+          ]
+        },
+        "828": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/Image"
+            }
+          ]
+        },
+        "1080": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/Image"
+            }
+          ]
+        },
+        "1200": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/Image"
+            }
+          ]
+        },
+        "1920": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/Image"
+            }
+          ]
+        },
+        "2048": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/Image"
+            }
+          ]
+        },
+        "3840": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/Image"
+            }
+          ]
+        }
       }
     },
     "Error": {

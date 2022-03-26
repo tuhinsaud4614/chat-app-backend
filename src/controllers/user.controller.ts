@@ -62,9 +62,9 @@ export const createUser: RequestHandler<{}, {}, CreateUserReqBody> = async (
     if (error.code === 11000) {
       return next(
         new HttpError(
-          "User already exist.",
+          "User already exist",
           409,
-          "This user already exist. Try the new one."
+          "This user already exist. Try the new one"
         )
       );
     }
@@ -74,9 +74,9 @@ export const createUser: RequestHandler<{}, {}, CreateUserReqBody> = async (
 
     next(
       new HttpError(
-        "User creation failed.",
+        "User creation failed",
         500,
-        "User not created. something went wrong."
+        "User not created. something went wrong"
       )
     );
   }
@@ -89,14 +89,14 @@ export const resendUserActivationLink: RequestHandler<
   try {
     const user = await findUserById(id as string);
 
-    const er = new HttpError("Could not resend verification code.", 400);
+    const er = new HttpError("Could not resend verification code", 400);
 
     if (!user) {
       return next(er);
     }
 
     if (user.verified) {
-      return next(new HttpError("User already verified.", 409));
+      return next(new HttpError("User already verified", 409));
     }
 
     const VRKey = USER_VERIFICATION_KEY_NAME(id as string);
@@ -113,10 +113,10 @@ export const resendUserActivationLink: RequestHandler<
     res
       .status(200)
       .json(
-        new HttpSuccess("Re-send verification code successfully.", "").toObj()
+        new HttpSuccess("Re-send verification code successfully", "").toObj()
       );
   } catch (error) {
-    return next(new HttpError("Could not resend verification code.", 400));
+    return next(new HttpError("Could not resend verification code", 400));
   }
 };
 
@@ -131,7 +131,7 @@ export const userVerify: RequestHandler<verifyValidateReqParams> = async (
     const user = await findUserById(id as string);
 
     if (!user) {
-      return next(new HttpError("User verification failed.", 400));
+      return next(new HttpError("User verification failed", 400));
     }
 
     if (user.verified) {
@@ -143,7 +143,7 @@ export const userVerify: RequestHandler<verifyValidateReqParams> = async (
     const redisCode = await redisClient.get(VRKey);
 
     if (verificationCode !== redisCode) {
-      return next(new HttpError("User verification failed.", 400));
+      return next(new HttpError("User verification failed", 400));
     }
 
     user.verified = true;
@@ -170,7 +170,7 @@ export const forgetPassword: RequestHandler<
     const user = await findUserByEmail(email);
 
     if (!user) {
-      return next(new HttpError("User not found!", 404));
+      return next(new HttpError("User not found", 404));
     }
 
     const resetCode = nanoid();
@@ -184,11 +184,11 @@ export const forgetPassword: RequestHandler<
     res
       .status(200)
       .json(
-        new HttpSuccess("Send reset password code successfully.", "").toObj()
+        new HttpSuccess("Send reset password code successfully", "").toObj()
       );
   } catch (err) {
     console.log("Reset password error & error is", err);
-    return next(new HttpError("Something went wrong!", 500));
+    return next(new HttpError("Something went wrong", 500));
   }
 };
 
@@ -201,7 +201,7 @@ export const verifyResetPassword: RequestHandler<
     const user = await findUserById(id as string);
 
     if (!user) {
-      return next(new HttpError("Reset password verification failed.", 400));
+      return next(new HttpError("Reset password verification failed", 400));
     }
 
     if (!user.verified) {
@@ -213,7 +213,7 @@ export const verifyResetPassword: RequestHandler<
     const redisCode = await redisClient.get(VRKey);
 
     if (verificationCode !== redisCode) {
-      return next(new HttpError("Reset password verification failed.", 400));
+      return next(new HttpError("Reset password verification failed", 400));
     }
 
     const io = SocketIO.getInstance();
@@ -230,7 +230,7 @@ export const verifyResetPassword: RequestHandler<
 
     res
       .status(200)
-      .json(new HttpSuccess("Reset password verify successfully.", "").toObj());
+      .json(new HttpSuccess("Reset password verify successfully", "").toObj());
   } catch (error) {
     return next(new HttpError("Reset password verification failed", 400));
   }
@@ -248,7 +248,7 @@ export const resetPassword: RequestHandler<
     const user = await findUserById(id as string);
 
     if (!user) {
-      return next(new HttpError("Reset password failed.", 400));
+      return next(new HttpError("Reset password failed", 400));
     }
 
     if (!user.verified) {
@@ -260,7 +260,7 @@ export const resetPassword: RequestHandler<
     const redisCode = await redisClient.get(VRKey);
 
     if (verifiedCode !== redisCode) {
-      return next(new HttpError("Reset password failed.", 400));
+      return next(new HttpError("Reset password failed", 400));
     }
 
     user.password = newPassword as string;
@@ -270,7 +270,7 @@ export const resetPassword: RequestHandler<
 
     res
       .status(200)
-      .json(new HttpSuccess("Reset password successfully.", "").toObj());
+      .json(new HttpSuccess("Reset password successfully", "").toObj());
   } catch (error) {
     return next(new HttpError("Reset password failed", 400));
   }

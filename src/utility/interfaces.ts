@@ -20,6 +20,7 @@ export interface IOmitUser {
   lastName: string | null;
   email: string;
   avatar: IExtendedImage | null;
+  role: string;
 }
 
 export interface IImage {

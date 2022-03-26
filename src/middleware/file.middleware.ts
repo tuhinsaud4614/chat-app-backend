@@ -13,7 +13,7 @@ const diskStore = (dest: string) => {
     },
     filename(_, file, cb) {
       if (!(file.mimetype in IMAGE_MIMES)) {
-        return cb(new HttpError("Invalid image type.", 422), "");
+        return cb(new HttpError("Invalid image type", 422), "");
       }
       const ext = IMAGE_MIMES[file.mimetype as IMAGE_MIME_TYPE];
       const imageName = `${gId}.${ext}`;
@@ -31,7 +31,7 @@ export const imageUpload = (
     storage: dest ? diskStore(dest) : undefined,
     fileFilter(_, file, cb) {
       if (!(file.mimetype in IMAGE_MIMES)) {
-        return cb(new HttpError("Invalid image type.", 422));
+        return cb(new HttpError("Invalid image type", 422));
       }
       cb(null, true);
     },

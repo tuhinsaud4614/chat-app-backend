@@ -17,7 +17,7 @@ export const loginUser: RequestHandler<{}, {}, UserLoginReqBody> = async (
 ) => {
   const { email, password } = trimmedObjValue(req.body);
 
-  const er = new HttpError("Invalid email or password.", 400);
+  const er = new HttpError("Invalid email or password", 400);
 
   try {
     const user = await findUserByEmail(email as string);
@@ -32,12 +32,13 @@ export const loginUser: RequestHandler<{}, {}, UserLoginReqBody> = async (
       return next(er);
     }
 
-    const leanUser = {
+    const leanUser: IOmitUser = {
       id: user._id,
       email: user.email,
       avatar: user.avatar,
       firstName: user.firstName,
       lastName: user.lastName,
+      role: user.role,
     };
 
     const accessToken = await generateToken(
@@ -53,14 +54,14 @@ export const loginUser: RequestHandler<{}, {}, UserLoginReqBody> = async (
       true
     );
 
-    const result = new HttpSuccess("User logged in successfully.", {
+    const result = new HttpSuccess("User logged in successfully", {
       ...leanUser,
       accessToken,
       refreshToken,
     }).toObj();
     res.status(200).json(result);
   } catch (error) {
-    next(new HttpError("Could not login user.", 500));
+    next(new HttpError("Could not login user", 500));
   }
 };
 
@@ -72,7 +73,7 @@ export const getNewTokens: RequestHandler = async (req, res, next) => {
     const isExist = await findUserById(user.id);
 
     if (!isExist) {
-      return next(new HttpError("User not exist.", 404));
+      return next(new HttpError("User not exist", 404));
     }
 
     const accessToken = await generateToken(
@@ -88,8 +89,7 @@ export const getNewTokens: RequestHandler = async (req, res, next) => {
       true
     );
 
-    const result = new HttpSuccess("Get the tokens successfully.", {
-      ...user,
+    const result = new HttpSuccess("Get the tokens successfully", {
       accessToken,
       refreshToken,
     }).toObj();
@@ -108,14 +108,14 @@ export const logout: RequestHandler = async (req, res, next) => {
     const redisToken = await redisClient.get(REFRESH_TOKEN_KEY_NAME(id));
 
     if (!redisToken) {
-      return next(new HttpError("Already logged out.", 400));
+      return next(new HttpError("Already logged out", 400));
     }
 
     await redisClient.del(REFRESH_TOKEN_KEY_NAME(id));
 
-    const result = new HttpSuccess("Logout successfully.", "").toObj();
+    const result = new HttpSuccess("Logout successfully", "").toObj();
     return res.status(200).json(result);
   } catch (error) {
-    return next(new HttpError("Logout failed.", 400));
+    return next(new HttpError("Logout failed", 400));
   }
 };
