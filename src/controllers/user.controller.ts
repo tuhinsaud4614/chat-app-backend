@@ -150,6 +150,11 @@ export const userVerify: RequestHandler<verifyValidateReqParams> = async (
     await redisClient.del(VRKey);
     await user.save();
 
+    const io = SocketIO.getInstance();
+    io.emit(ESocketEvents.VerifyUser, {
+      id: id,
+    });
+
     res
       .status(200)
       .json(new HttpSuccess("User verified successfully", "").toObj());
