@@ -17,11 +17,10 @@ export const sendFriendRequest: RequestHandler<SendRequestReqParams> = async (
   res,
   next
 ) => {
-  const { receiverId } = req.params;
-  // @ts-ignore
-  const { id: senderId } = req.user as IOmitUser;
-
   try {
+    const { receiverId } = req.params;
+    // @ts-ignore
+    const { id: senderId } = req.user as IOmitUser;
     const sender = await findUserById(senderId);
     const receiver = await findUserById(receiverId!);
 
@@ -57,11 +56,10 @@ export const sendFriendRequest: RequestHandler<SendRequestReqParams> = async (
 export const acceptFriendRequest: RequestHandler<
   AcceptRequestReqParams
 > = async (req, res, next) => {
-  const { friendshipId } = req.params;
-  // @ts-ignore
-  const { id: receiverId } = req.user as IOmitUser;
-
   try {
+    const { friendshipId } = req.params;
+    // @ts-ignore
+    const { id: receiverId } = req.user as IOmitUser;
     const friendship = await findFriendshipById(friendshipId!);
 
     if (!friendship) {
@@ -87,5 +85,42 @@ export const acceptFriendRequest: RequestHandler<
     );
   } catch (error) {
     return next(new HttpError("Accept friend request failed", 400));
+  }
+};
+
+export const cancelFriendRequest: RequestHandler<
+  AcceptRequestReqParams
+> = async (req, res, next) => {
+  try {
+    const { friendshipId } = req.params;
+    // @ts-ignore
+    const { id: userId } = req.user as IOmitUser;
+    const friendship = await findFriendshipById(friendshipId!);
+
+    if (!friendship) {
+      return next(new HttpError("This friendship not exist", 404));
+    }
+
+    const cancelErr = new HttpError("You can't cancel this request", 400);
+    if (
+      (friendship.receiver && friendship.receiver.toString() === userId) ||
+      (friendship.sender && friendship.sender.toString() === userId)
+    ) {
+      if (friendship.accept) {
+        return next(cancelErr);
+      }
+
+      await friendship.remove();
+      res
+        .status(200)
+        .json(
+          new HttpSuccess("Cancel friend request successfully", null).toObj()
+        );
+      return;
+    }
+
+    return next(cancelErr);
+  } catch (error) {
+    return next(new HttpError("Cancel friend request failed", 400));
   }
 };

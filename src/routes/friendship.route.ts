@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
   acceptFriendRequest,
+  cancelFriendRequest,
   sendFriendRequest,
 } from "../controllers/friendship.controller";
 import { validateRequest } from "../middleware";
@@ -24,6 +25,13 @@ router.patch(
   validateRequest(acceptRequestValidateSchema, 422),
   verifyAccessToken,
   acceptFriendRequest
+);
+
+router.delete(
+  "/cancel-request/:friendshipId",
+  validateRequest(acceptRequestValidateSchema, 422),
+  verifyAccessToken,
+  cancelFriendRequest
 );
 
 export default router;
