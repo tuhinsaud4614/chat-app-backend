@@ -1,6 +1,6 @@
 import FriendshipModel from "../models/friendship.model";
 
-export const createFriendshipService = async (
+export const createFriendship = async (
   senderId: string,
   receiverId: string
 ) => {
@@ -10,7 +10,7 @@ export const createFriendshipService = async (
   });
 };
 
-export const isExistFriendshipService = async (
+export const isExistFriendship = async (
   senderId: string,
   receiverId: string
 ) => {
@@ -20,4 +20,8 @@ export const isExistFriendshipService = async (
       { sender: receiverId, receiver: senderId },
     ],
   });
+};
+
+export const findFriendshipById = async (id: string) => {
+  return await FriendshipModel.findById(id);
 };

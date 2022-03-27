@@ -1,6 +1,9 @@
 import * as yup from "yup";
 import { refreshTokenValidateSchema } from "../schema/auth.schema";
-import { sendRequestValidateSchema } from "../schema/friendship.schema";
+import {
+  acceptRequestValidateSchema,
+  sendRequestValidateSchema,
+} from "../schema/friendship.schema";
 import {
   createUserValidateSchema,
   resendUserVerificationCodeValidateSchema,
@@ -52,4 +55,8 @@ export type UserResetPasswordReqParams = yup.TypeOf<
 
 export type SendRequestReqParams = yup.TypeOf<
   typeof sendRequestValidateSchema
+>["params"];
+
+export type AcceptRequestReqParams = yup.TypeOf<
+  typeof acceptRequestValidateSchema
 >["params"];
