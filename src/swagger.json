@@ -795,6 +795,87 @@
           }
         }
       }
+    },
+    "/api/v1/friendship/accept-request/{friendshipId}": {
+      "patch": {
+        "tags": ["Friendship"],
+        "summary": "Accept friend request",
+        "description": "This route will accept friend request to other user.",
+        "security": [{ "Bearer": [] }],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "friendshipId",
+            "description": "The id of the friendship",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Success"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "friendshipId": { "type": "string" },
+                        "isAccept": { "type": "boolean", "default": true }
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "403": {
+            "description": "Invalid request",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Not exist",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+
+          "422": {
+            "description": "Invalid inputs",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
     }
   },
   "securityDefinitions": {
