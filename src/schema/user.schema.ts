@@ -1,3 +1,4 @@
+import { Types } from "mongoose";
 import sanitizeHtml from "sanitize-html";
 import * as yup from "yup";
 
@@ -47,13 +48,26 @@ export const createUserValidateSchema = yup.object().shape({
 
 export const resendUserVerificationCodeValidateSchema = yup.object().shape({
   params: yup.object().shape({
-    id: yup.string().required("User ID is required"),
+    id: yup
+      .string()
+      .required("User ID is required")
+      .test(
+        "validId",
+        "Valid user id is required",
+        (value) => !!value && Types.ObjectId.isValid(value)
+      ),
   }),
 });
 
 export const verifyValidateSchema = yup.object().shape({
   params: yup.object().shape({
-    id: yup.string(),
+    id: yup
+      .string()
+      .test(
+        "validId",
+        "Valid id is required",
+        (value) => !!value && Types.ObjectId.isValid(value)
+      ),
     verificationCode: yup.string(),
   }),
 });
