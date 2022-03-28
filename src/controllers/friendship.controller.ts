@@ -1,5 +1,8 @@
+import { mongoose } from "@typegoose/typegoose";
 import { RequestHandler } from "express";
 import { HttpError, HttpSuccess } from "../models";
+import ConversationModel from "../models/conversation.model";
+import { findFriendConversation } from "../services/conversation.service";
 import {
   createFriendship,
   findFriendshipById,
@@ -70,20 +73,59 @@ export const acceptFriendRequest: RequestHandler<
       return next(new HttpError("You can't accept this request", 400));
     }
 
+    if (!friendship.sender) {
+      return next(new HttpError("You can't accept this request", 400));
+    }
+
     if (friendship.accept) {
       return next(new HttpError("They are already friend", 400));
     }
 
+    const senderId = friendship.sender.toString();
+
+    const isExistConversation = await findFriendConversation(
+      senderId,
+      receiverId
+    );
+
     friendship.accept = true;
-    await friendship.save();
+    if (isExistConversation) {
+      await friendship.save();
+      return res.status(200).json(
+        new HttpSuccess("Accept friend request successfully", {
+          friendshipId,
+          conversationId: isExistConversation._id,
+        }).toObj()
+      );
+    }
+
+    const conversation = new ConversationModel({
+      participants: [senderId, receiverId],
+    });
+
+    const sess = await mongoose.startSession();
+    try {
+      await sess.withTransaction(async () => {
+        // Have to solve this error
+        // await friendship.save({ session: sess });
+        // await conversation.save({ session: sess });
+        await friendship.save();
+        await conversation.save();
+      });
+    } finally {
+      console.log("hello");
+      sess.endSession();
+    }
 
     res.status(200).json(
       new HttpSuccess("Accept friend request successfully", {
         friendshipId,
-        isAccept: true,
+        conversationId: conversation._id,
       }).toObj()
     );
   } catch (error) {
+    console.log(error);
+
     return next(new HttpError("Accept friend request failed", 400));
   }
 };

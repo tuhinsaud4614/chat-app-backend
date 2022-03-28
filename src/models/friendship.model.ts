@@ -3,17 +3,12 @@ import {
   modelOptions,
   prop,
   Ref,
-  Severity,
 } from "@typegoose/typegoose";
 import { User } from "./user.model";
 
 @modelOptions({
   schemaOptions: {
     timestamps: true,
-  },
-  options: {
-    // this allow mixed type value insertion in the property
-    allowMixed: Severity.ALLOW,
   },
 })
 export class Friendship {
