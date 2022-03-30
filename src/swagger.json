@@ -19,6 +19,10 @@
     {
       "name": "Friendship",
       "description": "All routes of the friendship."
+    },
+    {
+      "name": "Conversation",
+      "description": "All routes of the conversation."
     }
   ],
   "paths": {
@@ -954,6 +958,73 @@
           }
         }
       }
+    },
+    "/api/v1/conversation": {
+      "get": {
+        "tags": ["Conversation"],
+        "summary": "All the conversations",
+        "description": "This route will return all the conversations.",
+        "security": [{ "Bearer": [] }],
+        "responses": {
+          "200": {
+            "description": "Successful",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Success"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/definitions/Conversation"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "403": {
+            "description": "Invalid request",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Not exist",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "422": {
+            "description": "Invalid inputs",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
     }
   },
   "securityDefinitions": {
@@ -974,7 +1045,7 @@
     "User": {
       "type": "object",
       "properties": {
-        "id": { "type": "string" },
+        "_id": { "type": "string" },
         "firstName": { "type": "string", "default": null },
         "lastName": { "type": "string", "default": null },
         "email": { "type": "string" },
@@ -1066,6 +1137,26 @@
             }
           ]
         }
+      }
+    },
+    "Conversation": {
+      "type": "object",
+      "properties": {
+        "_id": { "type": "string" },
+        "participants": {
+          "type": "array",
+          "items": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/User"
+              }
+            ]
+          }
+        },
+        "name": { "type": "string", "default": null },
+        "isGroup": { "type": "boolean", "default": false },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
       }
     },
     "Error": {

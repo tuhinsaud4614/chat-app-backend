@@ -39,5 +39,6 @@ export const findConversations = async (userId: string) => {
     },
   })
     .lean()
+    .select("-__v")
     .populate("participants", USER_POPULATE_SELECT, UserModel);
 };
