@@ -1,4 +1,6 @@
 import ConversationModel from "../models/conversation.model";
+import UserModel from "../models/user.model";
+import { USER_POPULATE_SELECT } from "../utility";
 
 export const createConversation = async (
   senderId: string,
@@ -28,4 +30,14 @@ export const findFriendConversation = async (
       { participants: { $all: [senderId, receiverId] } },
     ],
   });
+};
+
+export const findConversations = async (userId: string) => {
+  return await ConversationModel.find({
+    participants: {
+      $in: [userId],
+    },
+  })
+    .lean()
+    .populate("participants", USER_POPULATE_SELECT, UserModel);
 };

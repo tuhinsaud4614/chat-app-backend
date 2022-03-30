@@ -13,6 +13,7 @@ import {
   AcceptRequestReqParams,
   IOmitUser,
   SendRequestReqParams,
+  UserRole,
 } from "../utility";
 
 export const sendFriendRequest: RequestHandler<SendRequestReqParams> = async (
@@ -35,6 +36,10 @@ export const sendFriendRequest: RequestHandler<SendRequestReqParams> = async (
 
     if (!sender || !receiver) {
       return next(new HttpError("User not exist", 404));
+    }
+
+    if (sender.role === UserRole.admin || receiver.role === UserRole.admin) {
+      return next(new HttpError("User should be general user.", 400));
     }
 
     const isExist = await isExistFriendship(senderId, receiverId!);

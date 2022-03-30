@@ -30,3 +30,5 @@ export const IMAGE_BREAKPOINTS = [
   2048,
   3840,
 ] as const;
+
+export const USER_POPULATE_SELECT = "_id firstName lastName email avatar role";
