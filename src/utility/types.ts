@@ -1,6 +1,10 @@
 import * as yup from "yup";
 import { refreshTokenValidateSchema } from "../schema/auth.schema";
 import {
+  sendMessageValidateSchema,
+  singleConversationValidateSchema,
+} from "../schema/conversation.schema";
+import {
   acceptRequestValidateSchema,
   sendRequestValidateSchema,
 } from "../schema/friendship.schema";
@@ -60,3 +64,19 @@ export type SendRequestReqParams = yup.TypeOf<
 export type AcceptRequestReqParams = yup.TypeOf<
   typeof acceptRequestValidateSchema
 >["params"];
+
+export type SingleConversationReqParams = yup.TypeOf<
+  typeof singleConversationValidateSchema
+>["params"];
+
+export type SingleConversationQuery = yup.TypeOf<
+  typeof singleConversationValidateSchema
+>["query"];
+
+export type SendMessageReqParams = yup.TypeOf<
+  typeof sendMessageValidateSchema
+>["params"];
+
+export type SendMessageReqBody = yup.TypeOf<
+  typeof sendMessageValidateSchema
+>["body"];

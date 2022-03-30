@@ -42,3 +42,7 @@ export const findConversations = async (userId: string) => {
     .select("-__v")
     .populate("participants", USER_POPULATE_SELECT, UserModel);
 };
+
+export const findConversationById = async (id: string) => {
+  return await ConversationModel.findById(id);
+};
