@@ -77,8 +77,6 @@ export const singleConversation: RequestHandler<
     }).toObj();
     res.status(200).json(result);
   } catch (error) {
-    console.log(error);
-
     return next(new HttpError("Failed to get all messages", 400));
   }
 };

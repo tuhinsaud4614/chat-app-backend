@@ -1,4 +1,6 @@
 import MessageModel from "../models/message.model";
+import UserModel from "../models/user.model";
+import { USER_POPULATE_SELECT } from "../utility";
 
 export const countMessagesWithConversation = async (conversationId: string) => {
   return await MessageModel.find({
@@ -17,6 +19,7 @@ export const findMessagesWithConversation = async (
     .sort([["updatedAt", -1]])
     .skip((page - 1) * limit)
     .limit(limit)
+    .populate("sender", USER_POPULATE_SELECT, UserModel)
     .lean()
     .select("-__v");
 };
