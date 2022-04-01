@@ -1,12 +1,11 @@
 import {
   getModelForClass,
   modelOptions,
-  mongoose,
   prop,
   Ref,
   Severity,
 } from "@typegoose/typegoose";
-import { IExtendedImage } from "../utility";
+import { IAttachment, IExtendedImage } from "../utility";
 import { Conversation } from "./conversation.model";
 import { User } from "./user.model";
 
@@ -26,11 +25,8 @@ export class Message {
   @prop({ ref: () => User, required: true })
   public sender: Ref<User>;
 
-  @prop({ default: null })
-  public text: string | null;
-
-  @prop({ default: [] })
-  public images: mongoose.Types.Array<IExtendedImage>;
+  @prop({ required: true })
+  public message: string | IAttachment | IExtendedImage;
 }
 
 const MessageModel = getModelForClass(Message);

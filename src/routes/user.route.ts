@@ -62,7 +62,7 @@ router.post(
 router.patch(
   "/profile",
   verifyAccessToken,
-  imageUpload(undefined, maxFileSize(5)).single("avatar"),
+  imageUpload(maxFileSize(5)).single("avatar"),
   validateRequest(userProfileValidateSchema, 422),
   uploadAvatar
 );

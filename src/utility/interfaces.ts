@@ -1,3 +1,5 @@
+import { AttachmentType } from "./types";
+
 export interface IErrorResponse {
   success: boolean;
   detail: string | null;
@@ -43,4 +45,9 @@ export interface IExtendedImage {
   2048: IImage;
   3840: IImage;
   parentDir: string;
+}
+
+export interface IAttachment {
+  type: AttachmentType;
+  value: string;
 }

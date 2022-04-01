@@ -2,6 +2,13 @@ import del from "del";
 import { existsSync } from "fs";
 import path from "path";
 import sharp, { FormatEnum } from "sharp";
+import { AUDIO_MIMES, DOCUMENT_MIMES, VIDEO_MIMES } from "./constants";
+import {
+  AttachmentType,
+  AUDIO_MIME_TYPE,
+  DOCUMENT_MIME_TYPE,
+  VIDEO_MIME_TYPE,
+} from "./types";
 
 export function trimmedObjValue<T extends Object>(obj: T) {
   if (typeof obj === "object") {
@@ -80,3 +87,29 @@ export function omit<T extends object>(object: T, ...args: string[]) {
   });
   return object;
 }
+
+export const getAttachmentExtAndDest = (mimetype: string) => {
+  let ext = "";
+  let dest = null;
+  let attachmentType: AttachmentType | null = null;
+  if (mimetype in AUDIO_MIMES) {
+    ext = AUDIO_MIMES[mimetype as AUDIO_MIME_TYPE];
+    dest = "audios";
+    attachmentType = "AUDIO";
+  } else if (mimetype in VIDEO_MIMES) {
+    ext = VIDEO_MIMES[mimetype as VIDEO_MIME_TYPE];
+    dest = "videos";
+    attachmentType = "VIDEO";
+  } else if (mimetype in DOCUMENT_MIMES) {
+    ext = DOCUMENT_MIMES[mimetype as DOCUMENT_MIME_TYPE];
+    dest = "documents";
+    attachmentType = "DOCUMENT";
+  }
+
+  return {
+    ext,
+    dest: dest ? path.join(process.cwd(), dest) : null,
+    baseDest: dest,
+    attachmentType,
+  } as const;
+};

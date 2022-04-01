@@ -1,12 +1,13 @@
 import * as yup from "yup";
 import { refreshTokenValidateSchema } from "../schema/auth.schema";
 import {
+  sendAttachmentValidateSchema,
   sendMessageValidateSchema,
-  singleConversationValidateSchema,
+  singleConversationValidateSchema
 } from "../schema/conversation.schema";
 import {
   acceptRequestValidateSchema,
-  sendRequestValidateSchema,
+  sendRequestValidateSchema
 } from "../schema/friendship.schema";
 import {
   createUserValidateSchema,
@@ -14,9 +15,14 @@ import {
   userForgetPasswordValidateSchema,
   userLoginValidateSchema,
   userResetPasswordValidateSchema,
-  verifyValidateSchema,
+  verifyValidateSchema
 } from "../schema/user.schema";
-import { IMAGE_MIMES } from "./constants";
+import {
+  AUDIO_MIMES,
+  DOCUMENT_MIMES,
+  IMAGE_MIMES,
+  VIDEO_MIMES
+} from "./constants";
 
 export enum UserRole {
   admin = "ADMIN",
@@ -24,6 +30,10 @@ export enum UserRole {
 }
 
 export type IMAGE_MIME_TYPE = keyof typeof IMAGE_MIMES;
+export type AUDIO_MIME_TYPE = keyof typeof AUDIO_MIMES;
+export type VIDEO_MIME_TYPE = keyof typeof VIDEO_MIMES;
+export type DOCUMENT_MIME_TYPE = keyof typeof DOCUMENT_MIMES;
+export type AttachmentType = "DOCUMENT" | "AUDIO" | "VIDEO";
 
 export type CreateUserReqBody = yup.TypeOf<
   typeof createUserValidateSchema
@@ -80,3 +90,7 @@ export type SendMessageReqParams = yup.TypeOf<
 export type SendMessageReqBody = yup.TypeOf<
   typeof sendMessageValidateSchema
 >["body"];
+
+export type SendAttachmentReqParams = yup.TypeOf<
+  typeof sendAttachmentValidateSchema
+>["params"];

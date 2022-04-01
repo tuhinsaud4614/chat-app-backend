@@ -42,6 +42,9 @@ app.use(json());
 app.use(urlencoded({ extended: false }));
 
 app.use("/images", express.static(path.join(process.cwd(), "images")));
+app.use("/videos", express.static(path.join(process.cwd(), "videos")));
+app.use("/audios", express.static(path.join(process.cwd(), "audios")));
+app.use("/documents", express.static(path.join(process.cwd(), "documents")));
 app.use("/api-docs", swagger.serve, swagger.setup(swaggerDocument));
 app.use("/api/v1", routes);
 

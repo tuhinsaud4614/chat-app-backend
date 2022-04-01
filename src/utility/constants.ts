@@ -31,4 +31,33 @@ export const IMAGE_BREAKPOINTS = [
   3840,
 ] as const;
 
+export const AUDIO_MIMES = {
+  "audio/aac": "aac",
+  "audio/mpeg": "mp3",
+  "audio/wav": ".wav",
+  "audio/webm": ".weba",
+} as const;
+
+export const VIDEO_MIMES = {
+  "video/x-msvideo": "avi",
+  "video/mp4": "mp4",
+  "video/mpeg": "mpeg",
+  "video/webm": "webm",
+} as const;
+
+export const DOCUMENT_MIMES = {
+  "application/zip": "zip",
+  "application/x-7z-compressed": "7z",
+  "application/x-tar": "tar",
+  "application/vnd.openxmlformats-officedocument.presentationml.presentation":
+    "pptx",
+  "application/vnd.ms-powerpoint": "ppt",
+  "application/pdf": "pdf",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+    "docx",
+  "application/msword": "doc",
+  "text/csv": "csv",
+  "text/plain": "txt",
+} as const;
+
 export const USER_POPULATE_SELECT = "_id firstName lastName email avatar role";

@@ -1,4 +1,5 @@
 import { ErrorRequestHandler, NextFunction, Request, Response } from "express";
+import { unlink } from "fs";
 import { MulterError } from "multer";
 import { AnySchema, ValidationError } from "yup";
 import logger from "../logger";
@@ -22,21 +23,20 @@ export const validateRequest = (schema: AnySchema, code: number = 500) => {
   };
 };
 
-export const errorHandler: ErrorRequestHandler = (err, _, res, next) => {
+export const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
   if (res.headersSent) {
     logger.warn("Header already sent");
     return next(err);
   }
 
-  // if (req.file) {
-  //   unlink(req.file.path, (linkErr) => {
-  //     if (linkErr) {
-  //       return next(new HttpError("File remove failed", 500, err.code));
-  //     }
-  //   });
-  // }
-
   if (err instanceof MulterError) {
+    if (req.file) {
+      unlink(req.file.path, (linkErr) => {
+        if (linkErr) {
+          logger.error(linkErr?.message);
+        }
+      });
+    }
     logger.error(err.message);
     const newError = new HttpError(err.message, 400, err.code);
 
