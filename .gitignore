@@ -1,5 +1,8 @@
 /node_modules
 /dist
 /images
+/audios
+/videos
+/documents
 **/*.DS_Store
 .env
