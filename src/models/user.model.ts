@@ -51,6 +51,9 @@ export class User {
   @prop({ default: false })
   public verified: boolean;
 
+  @prop({ default: false })
+  public active: boolean;
+
   async validatePassword(this: DocumentType<User>, newPassword: string) {
     try {
       return await compare(newPassword, this.password);

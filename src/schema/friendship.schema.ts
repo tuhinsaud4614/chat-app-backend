@@ -24,3 +24,16 @@ export const acceptRequestValidateSchema = yup.object().shape({
       ),
   }),
 });
+
+export const activeFriendValidateSchema = yup.object().shape({
+  query: yup.object().shape({
+    page: yup
+      .number()
+      .required("Page is required")
+      .min(1, "Minimum page number should be 1"),
+    limit: yup
+      .number()
+      .required("Limit is required")
+      .min(1, "Minimum limit should be 1"),
+  }),
+});

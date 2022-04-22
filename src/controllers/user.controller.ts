@@ -25,6 +25,7 @@ import {
   UserResetPasswordReqBody,
   UserResetPasswordReqParams,
   UserRole,
+  UserStatusReqBody,
   USER_RESET_PASSWORD_KEY_NAME,
   USER_RESET_PASSWORD_VERIFIED_KEY_NAME,
   USER_VERIFICATION_KEY_NAME,
@@ -311,6 +312,47 @@ export const uploadAvatar: RequestHandler = async (req, res, next) => {
       new HttpSuccess("Avatar upload successfully", {
         id,
         image: _.omit(user.avatar, "parentDir"),
+      }).toObj()
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const userStatus: RequestHandler<{}, {}, UserStatusReqBody> = async (
+  req,
+  res,
+  next
+) => {
+  // @ts-ignore
+  const { id } = req.user as IOmitUser;
+
+  const { status } = req.body;
+
+  try {
+    const user = await findUserById(id);
+
+    if (!user) {
+      return next(new HttpError("User not exist", 404));
+    }
+
+    user.active = status!;
+    await user.save();
+
+    SocketIO.getInstance().emit(ESocketEvents.USER_STATUS, {
+      user: id,
+      active: status,
+    });
+    // io.on("connection", (socket) => {
+    //   socket.broadcast.emit(ESocketEvents.USER_STATUS, {
+    //     user: id,
+    //     active: status,
+    //   });
+    // });
+
+    res.json(
+      new HttpSuccess("User active successfully", {
+        id,
       }).toObj()
     );
   } catch (error) {

@@ -30,6 +30,15 @@ const httpServer = createServer(app);
 const socket = SocketIO.getInstance(httpServer);
 socket.on("connection", (socket) => {
   logger.info("Socket connected successfully.");
+  socket.on("active", (data) => {
+    console.log(data);
+    socket.broadcast.emit("check-active-user", { user: data.user });
+  });
+
+  socket.on("de-activate", (data) => {
+    console.log(data);
+    socket.broadcast.emit("check-active-user", { user: data.user });
+  });
   socket.on("disconnect", () => {
     logger.warn("Socket is disconnected.");
   });

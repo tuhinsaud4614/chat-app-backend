@@ -122,3 +122,12 @@ export const userResetPasswordValidateSchema = yup.object().shape({
 export const userProfileValidateSchema = yup.object().shape({
   file: yup.mixed().required("Avatar is required"),
 });
+
+export const userStatusValidateSchema = yup.object().shape({
+  body: yup.object().shape({
+    status: yup
+      .bool()
+      .required("Status is required!")
+      .oneOf([true, false], "Must be true or false"),
+  }),
+});

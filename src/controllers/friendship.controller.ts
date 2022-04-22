@@ -6,11 +6,13 @@ import { findFriendConversation } from "../services/conversation.service";
 import {
   createFriendship,
   findFriendshipById,
+  getActiveFriends,
   isExistFriendship,
 } from "../services/friendship.service";
 import { findUserById } from "../services/user.service";
 import {
   AcceptRequestReqParams,
+  ActiveFriendsQuery,
   IOmitUser,
   SendRequestReqParams,
   UserRole,
@@ -107,6 +109,7 @@ export const acceptFriendRequest: RequestHandler<
     const conversation = new ConversationModel({
       participants: [senderId, receiverId],
     });
+    friendship.conversation = conversation;
 
     const sess = await mongoose.startSession();
     try {
@@ -169,5 +172,35 @@ export const cancelFriendRequest: RequestHandler<
     return next(cancelErr);
   } catch (error) {
     return next(new HttpError("Cancel friend request failed", 400));
+  }
+};
+
+// Active friends
+export const allActiveFriends: RequestHandler<
+  {},
+  {},
+  {},
+  ActiveFriendsQuery
+> = async (req, res, next) => {
+  // @ts-ignore
+  const { id: userId } = req.user as IOmitUser;
+  try {
+    const limit = +req.query.limit!;
+    const page = +req.query.page!;
+
+    const friendships = await getActiveFriends(userId, limit, page);
+
+    if (!friendships.length) {
+      return next(new HttpError("No active friends found", 404));
+    }
+
+    const result = new HttpSuccess(
+      "All the active friends",
+      friendships
+    ).toObj();
+    res.status(200).json(result);
+  } catch (error) {
+    console.log(error);
+    return next(new HttpError("Failed to get all active friends", 400));
   }
 };

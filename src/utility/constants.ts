@@ -60,4 +60,32 @@ export const DOCUMENT_MIMES = {
   "text/plain": "txt",
 } as const;
 
-export const USER_POPULATE_SELECT = "_id firstName lastName email avatar role";
+export const USER_POPULATE_SELECT =
+  "_id firstName lastName email avatar role active";
+
+export const USER_PROJECT_SELECT = (refKey: string) => {
+  return {
+    [`${refKey}._id`]: 1,
+    [`${refKey}.firstName`]: 1,
+    [`${refKey}.lastName`]: 1,
+    [`${refKey}.email`]: 1,
+    [`${refKey}.avatar`]: 1,
+    [`${refKey}.role`]: 1,
+    [`${refKey}.active`]: 1,
+  };
+};
+
+export const CONVERSATION_PROJECT_SELECT = (
+  refKey: string,
+  participants?: boolean
+) => {
+  const obj = {
+    [`${refKey}._id`]: 1,
+    [`${refKey}.isGroup`]: 1,
+    [`${refKey}.name`]: 1,
+  };
+  if (participants) {
+    return { ...obj, [`${refKey}.participants`]: 1 };
+  }
+  return obj;
+};

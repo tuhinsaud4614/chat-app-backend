@@ -3,11 +3,12 @@ import { refreshTokenValidateSchema } from "../schema/auth.schema";
 import {
   sendAttachmentValidateSchema,
   sendMessageValidateSchema,
-  singleConversationValidateSchema
+  singleConversationValidateSchema,
 } from "../schema/conversation.schema";
 import {
   acceptRequestValidateSchema,
-  sendRequestValidateSchema
+  activeFriendValidateSchema,
+  sendRequestValidateSchema,
 } from "../schema/friendship.schema";
 import {
   createUserValidateSchema,
@@ -15,13 +16,14 @@ import {
   userForgetPasswordValidateSchema,
   userLoginValidateSchema,
   userResetPasswordValidateSchema,
-  verifyValidateSchema
+  userStatusValidateSchema,
+  verifyValidateSchema,
 } from "../schema/user.schema";
 import {
   AUDIO_MIMES,
   DOCUMENT_MIMES,
   IMAGE_MIMES,
-  VIDEO_MIMES
+  VIDEO_MIMES,
 } from "./constants";
 
 export enum UserRole {
@@ -67,6 +69,10 @@ export type UserResetPasswordReqParams = yup.TypeOf<
   typeof userResetPasswordValidateSchema
 >["params"];
 
+export type UserStatusReqBody = yup.TypeOf<
+  typeof userStatusValidateSchema
+>["body"];
+
 export type SendRequestReqParams = yup.TypeOf<
   typeof sendRequestValidateSchema
 >["params"];
@@ -74,6 +80,10 @@ export type SendRequestReqParams = yup.TypeOf<
 export type AcceptRequestReqParams = yup.TypeOf<
   typeof acceptRequestValidateSchema
 >["params"];
+
+export type ActiveFriendsQuery = yup.TypeOf<
+  typeof activeFriendValidateSchema
+>["query"];
 
 export type SingleConversationReqParams = yup.TypeOf<
   typeof singleConversationValidateSchema

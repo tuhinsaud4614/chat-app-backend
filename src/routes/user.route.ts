@@ -5,6 +5,7 @@ import {
   resendUserActivationLink,
   resetPassword,
   uploadAvatar,
+  userStatus,
   userVerify,
   verifyResetPassword,
 } from "../controllers/user.controller";
@@ -17,6 +18,7 @@ import {
   userForgetPasswordValidateSchema,
   userProfileValidateSchema,
   userResetPasswordValidateSchema,
+  userStatusValidateSchema,
   verifyValidateSchema,
 } from "../schema/user.schema";
 import { maxFileSize } from "../utility";
@@ -66,4 +68,12 @@ router.patch(
   validateRequest(userProfileValidateSchema, 422),
   uploadAvatar
 );
+
+router.patch(
+  "/status",
+  verifyAccessToken,
+  validateRequest(userStatusValidateSchema, 422),
+  userStatus
+);
+
 export default router;
