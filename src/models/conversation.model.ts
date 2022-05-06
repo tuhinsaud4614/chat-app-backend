@@ -5,7 +5,7 @@ import {
   Ref,
   Severity,
 } from "@typegoose/typegoose";
-import { User } from "./user.model";
+import { Participant } from "./participant.model";
 
 @modelOptions({
   schemaOptions: {
@@ -17,8 +17,8 @@ import { User } from "./user.model";
   },
 })
 export class Conversation {
-  @prop({ ref: () => User, required: true, default: [] })
-  public participants: Ref<User>[];
+  @prop({ ref: () => Participant, required: true, default: [] })
+  public participants: Ref<Participant>[];
 
   @prop({ default: null })
   public name: string | null;

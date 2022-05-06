@@ -1,6 +1,7 @@
 import * as yup from "yup";
 import { refreshTokenValidateSchema } from "../schema/auth.schema";
 import {
+  AllConversationsValidateSchema,
   sendAttachmentValidateSchema,
   sendMessageValidateSchema,
   singleConversationValidateSchema,
@@ -29,6 +30,12 @@ import {
 export enum UserRole {
   admin = "ADMIN",
   user = "USER",
+}
+
+export enum GroupUserRole {
+  admin = "admin",
+  moderator = "moderator",
+  member = "member",
 }
 
 export type IMAGE_MIME_TYPE = keyof typeof IMAGE_MIMES;
@@ -83,6 +90,10 @@ export type AcceptRequestReqParams = yup.TypeOf<
 
 export type ActiveFriendsQuery = yup.TypeOf<
   typeof activeFriendValidateSchema
+>["query"];
+
+export type AllConversationReqQuery = yup.TypeOf<
+  typeof AllConversationsValidateSchema
 >["query"];
 
 export type SingleConversationReqParams = yup.TypeOf<

@@ -1,6 +1,6 @@
+import { Types } from "mongoose";
 import ConversationModel from "../models/conversation.model";
-import UserModel from "../models/user.model";
-import { USER_POPULATE_SELECT } from "../utility";
+import { USER_PROJECT_SELECT } from "../utility";
 
 export const createConversation = async (
   senderId: string,
@@ -32,17 +32,71 @@ export const findFriendConversation = async (
   });
 };
 
-export const findConversations = async (userId: string) => {
-  return await ConversationModel.find({
-    participants: {
-      $in: [userId],
+export const countConversations = async (userId: string) => {
+  return ConversationModel.aggregate([
+    {
+      $lookup: {
+        from: "participants",
+        let: { participants: "$participants" },
+        pipeline: [{ $match: { $expr: { $in: ["$_id", "$$participants"] } } }],
+        as: "participants",
+      },
     },
-  })
-    .lean()
-    .select("-__v")
-    .populate("participants", USER_POPULATE_SELECT, UserModel);
+    {
+      $match: {
+        "participants.user": {
+          $in: [new Types.ObjectId(userId)],
+        },
+      },
+    },
+    { $count: "id" },
+  ]);
+};
+
+export const findConversations = async (
+  userId: string,
+  page: number,
+  limit: number
+) => {
+  return ConversationModel.aggregate([
+    {
+      $lookup: {
+        from: "participants",
+        let: { participants: "$participants" },
+        pipeline: [
+          { $match: { $expr: { $in: ["$_id", "$$participants"] } } },
+          {
+            $lookup: {
+              from: "users",
+              localField: "user",
+              foreignField: "_id",
+              as: "user",
+            },
+          },
+          { $unwind: { path: "$user" } },
+          {
+            $project: {
+              _id: 0,
+              role: 1,
+              ...USER_PROJECT_SELECT("user"),
+            },
+          },
+        ],
+        as: "participants",
+      },
+    },
+    {
+      $match: {
+        "participants.user._id": {
+          $in: [new Types.ObjectId(userId)],
+        },
+      },
+    },
+    { $skip: (page - 1) * limit },
+    { $limit: limit },
+  ]);
 };
 
 export const findConversationById = async (id: string) => {
-  return await ConversationModel.findById(id);
+  return ConversationModel.findById(id);
 };

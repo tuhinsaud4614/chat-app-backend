@@ -2,6 +2,7 @@ import { mongoose } from "@typegoose/typegoose";
 import { RequestHandler } from "express";
 import { HttpError, HttpSuccess } from "../models";
 import ConversationModel from "../models/conversation.model";
+import ParticipantModel from "../models/participant.model";
 import { findFriendConversation } from "../services/conversation.service";
 import {
   createFriendship,
@@ -13,6 +14,7 @@ import { findUserById } from "../services/user.service";
 import {
   AcceptRequestReqParams,
   ActiveFriendsQuery,
+  GroupUserRole,
   IOmitUser,
   SendRequestReqParams,
   UserRole,
@@ -106,8 +108,18 @@ export const acceptFriendRequest: RequestHandler<
       );
     }
 
+    const senderParticipant = new ParticipantModel({
+      role: GroupUserRole.member,
+      user: senderId,
+    });
+
+    const receiverParticipant = new ParticipantModel({
+      role: GroupUserRole.member,
+      user: receiverId,
+    });
+
     const conversation = new ConversationModel({
-      participants: [senderId, receiverId],
+      participants: [senderParticipant, receiverParticipant],
     });
     friendship.conversation = conversation;
 
@@ -117,6 +129,8 @@ export const acceptFriendRequest: RequestHandler<
         // Have to solve this error
         // await friendship.save({ session: sess });
         // await conversation.save({ session: sess });
+        await senderParticipant.save();
+        await receiverParticipant.save();
         await friendship.save();
         await conversation.save();
       });

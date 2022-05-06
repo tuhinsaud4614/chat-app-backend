@@ -27,6 +27,9 @@ export class Message {
 
   @prop({ required: true })
   public message: string | IAttachment | IExtendedImage;
+
+  @prop({ ref: () => User, required: true, default: [] })
+  public seenBy: Ref<User>[];
 }
 
 const MessageModel = getModelForClass(Message);

@@ -9,6 +9,7 @@ import { validateRequest } from "../middleware";
 import { verifyAccessToken } from "../middleware/auth.middleware";
 import { attachmentUpload } from "../middleware/file.middleware";
 import {
+  AllConversationsValidateSchema,
   sendAttachmentValidateSchema,
   sendMessageValidateSchema,
   singleConversationValidateSchema,
@@ -17,7 +18,12 @@ import { maxFileSize } from "../utility";
 
 const router = Router();
 
-router.get("/", verifyAccessToken, allConversations);
+router.get(
+  "/",
+  verifyAccessToken,
+  validateRequest(AllConversationsValidateSchema, 422),
+  allConversations
+);
 router.get(
   "/:conversationId",
   verifyAccessToken,

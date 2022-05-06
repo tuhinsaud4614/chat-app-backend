@@ -4,6 +4,7 @@ import { HttpError, HttpSuccess } from "../models";
 import MessageModel from "../models/message.model";
 import UserModel from "../models/user.model";
 import {
+  countConversations,
   findConversationById,
   findConversations,
 } from "../services/conversation.service";
@@ -12,6 +13,7 @@ import {
   findMessagesWithConversation,
 } from "../services/message.service";
 import {
+  AllConversationReqQuery,
   getAttachmentExtAndDest,
   IAttachment,
   SendAttachmentReqParams,
@@ -22,21 +24,43 @@ import {
   USER_POPULATE_SELECT,
 } from "../utility";
 
-export const allConversations: RequestHandler = async (req, res, next) => {
+export const allConversations: RequestHandler<
+  {},
+  {},
+  {},
+  AllConversationReqQuery
+> = async (req, res, next) => {
   // @ts-ignore
   const { id: userId } = req.user as IOmitUser;
 
+  const limit = +req.query.limit!;
+  const page = +req.query.page!;
+
   try {
-    const conversations = await findConversations(userId);
-    if (!conversations.length) {
-      return next(new HttpError("No conversation found", 404));
+    const tempCountConversations = await countConversations(userId!);
+
+    if (tempCountConversations[0] && "id" in tempCountConversations[0]) {
+      if (tempCountConversations[0].id < 1) {
+        return next(new HttpError("No conversation found", 404));
+      }
+
+      const totalConversations = tempCountConversations[0].id;
+
+      const conversations = await findConversations(userId, page, limit);
+
+      const result = new HttpSuccess("All the conversations", {
+        conversations,
+        totalConversations: totalConversations,
+        hasNext: limit * page! < totalConversations,
+        nextPage: page + 1,
+        previousPage: page - 1,
+        totalPages: Math.ceil(totalConversations / limit),
+      }).toObj();
+      res.status(200).json(result);
+      return;
     }
 
-    const result = new HttpSuccess(
-      "All the conversations",
-      conversations
-    ).toObj();
-    res.status(200).json(result);
+    return next(new HttpError("Failed to get the conversations", 400));
   } catch (error) {
     return next(new HttpError("Failed to get all conversations", 400));
   }
