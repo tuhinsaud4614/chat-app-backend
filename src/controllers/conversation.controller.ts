@@ -1,5 +1,8 @@
 import { RequestHandler } from "express";
 import { HttpError, HttpSuccess } from "../models";
+import ConversationModel from "../models/conversation.model";
+import ParticipantModel from "../models/participant.model";
+import UserModel from "../models/user.model";
 import {
   countConversations,
   findConversationById,
@@ -11,8 +14,11 @@ import {
 } from "../services/message.service";
 import {
   AllConversationReqQuery,
+  CreateGroupReqBody,
+  GroupUserRole,
   SingleConversationQuery,
   SingleConversationReqParams,
+  USER_POPULATE_SELECT,
 } from "../utility";
 
 export const allConversations: RequestHandler<
@@ -99,5 +105,75 @@ export const singleConversation: RequestHandler<
     res.status(200).json(result);
   } catch (error) {
     return next(new HttpError("Failed to get all messages", 400));
+  }
+};
+
+export const createGroup: RequestHandler<{}, {}, CreateGroupReqBody> = async (
+  req,
+  res,
+  next
+) => {
+  // @ts-ignore
+  const { id: userId } = req.user as IOmitUser;
+
+  const { members, name } = req.body;
+
+  try {
+    // const sess = await mongoose.startSession();
+
+    const adminParticipant = new ParticipantModel({
+      role: GroupUserRole.admin,
+      user: userId,
+    });
+
+    const conversation = new ConversationModel({
+      name: name,
+      isGroup: true,
+      participants: [adminParticipant],
+    });
+
+    for (let index = 0; index < members!.length; index++) {
+      if (userId === members![index]) {
+        continue;
+      }
+      const participant = new ParticipantModel({
+        role: GroupUserRole.member,
+        user: members![index],
+      });
+
+      conversation.participants.push(participant);
+      await participant
+        .save
+        // { session: sess }
+        ();
+    }
+
+    await adminParticipant.save();
+    await conversation
+      .save
+      // { session: sess }
+      ();
+    // await sess.commitTransaction();
+    // await sess.endSession();
+
+    const popConversation = await conversation.populate({
+      path: "participants",
+      select: "_id role user",
+      model: ParticipantModel,
+      populate: {
+        path: "user",
+        select: USER_POPULATE_SELECT,
+        model: UserModel,
+      },
+    });
+
+    const result = new HttpSuccess("Group created", {
+      popConversation,
+    }).toObj();
+    res.status(200).json(result);
+  } catch (error) {
+    console.log(error);
+
+    return next(new HttpError("Failed to create group", 400));
   }
 };

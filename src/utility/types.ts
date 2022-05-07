@@ -2,6 +2,7 @@ import * as yup from "yup";
 import { refreshTokenValidateSchema } from "../schema/auth.schema";
 import {
   AllConversationsValidateSchema,
+  createGroupValidateSchema,
   singleConversationValidateSchema,
 } from "../schema/conversation.schema";
 import {
@@ -123,3 +124,7 @@ export type SendImageReqParams = yup.TypeOf<
 >["params"];
 
 export type SeenByReqParams = yup.TypeOf<typeof seenByValidateSchema>["params"];
+
+export type CreateGroupReqBody = yup.TypeOf<
+  typeof createGroupValidateSchema
+>["body"];

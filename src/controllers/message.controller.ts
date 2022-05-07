@@ -174,7 +174,7 @@ export const seenBy: RequestHandler<SeenByReqParams> = async (
     }
 
     if (isExist.seenBy.includes(userId)) {
-      return next(new HttpError("User already seen", 400));
+      return next(new HttpError("Message already seen", 400));
     }
 
     isExist.seenBy.push(userId);
@@ -184,7 +184,7 @@ export const seenBy: RequestHandler<SeenByReqParams> = async (
       .status(201)
       .json(
         new HttpSuccess(
-          "New message sent",
+          "Message seen",
           pick(isExist.toObject(), ["_id", "seenBy"])
         ).toObj()
       );
