@@ -2,8 +2,6 @@ import * as yup from "yup";
 import { refreshTokenValidateSchema } from "../schema/auth.schema";
 import {
   AllConversationsValidateSchema,
-  sendAttachmentValidateSchema,
-  sendMessageValidateSchema,
   singleConversationValidateSchema,
 } from "../schema/conversation.schema";
 import {
@@ -11,6 +9,12 @@ import {
   activeFriendValidateSchema,
   sendRequestValidateSchema,
 } from "../schema/friendship.schema";
+import {
+  seenByValidateSchema,
+  sendAttachmentValidateSchema,
+  sendImageValidateSchema,
+  sendTextValidateSchema,
+} from "../schema/message.schema";
 import {
   createUserValidateSchema,
   resendUserVerificationCodeValidateSchema,
@@ -104,14 +108,18 @@ export type SingleConversationQuery = yup.TypeOf<
   typeof singleConversationValidateSchema
 >["query"];
 
-export type SendMessageReqParams = yup.TypeOf<
-  typeof sendMessageValidateSchema
+export type SendTextReqParams = yup.TypeOf<
+  typeof sendTextValidateSchema
 >["params"];
 
-export type SendMessageReqBody = yup.TypeOf<
-  typeof sendMessageValidateSchema
->["body"];
+export type SendTextReqBody = yup.TypeOf<typeof sendTextValidateSchema>["body"];
 
 export type SendAttachmentReqParams = yup.TypeOf<
   typeof sendAttachmentValidateSchema
 >["params"];
+
+export type SendImageReqParams = yup.TypeOf<
+  typeof sendImageValidateSchema
+>["params"];
+
+export type SeenByReqParams = yup.TypeOf<typeof seenByValidateSchema>["params"];

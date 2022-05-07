@@ -23,3 +23,7 @@ export const findMessagesWithConversation = async (
     .lean()
     .select("-__v");
 };
+
+export const findMessageById = async (id: string) => {
+  return MessageModel.findById(id);
+};
