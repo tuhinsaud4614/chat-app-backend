@@ -41,6 +41,10 @@ export const sendText: RequestHandler<
       sender: userId,
     });
 
+    // Last modification on the conversation
+    isExist.lastModify = new Date();
+    await isExist.save();
+
     const message = await newMessage.populate({
       path: "sender",
       select: USER_POPULATE_SELECT,
@@ -87,6 +91,10 @@ export const sendAttachment: RequestHandler<SendAttachmentReqParams> = async (
         value: `${baseDest}/${req.file!.filename}`,
       } as IAttachment,
     });
+
+    // Last modification on the conversation
+    isExist.lastModify = new Date();
+    await isExist.save();
 
     const result = await newMessage.populate({
       path: "sender",
@@ -140,6 +148,10 @@ export const sendImage: RequestHandler<SendImageReqParams> = async (
       select: USER_POPULATE_SELECT,
       model: UserModel,
     });
+
+    // Last modification on the conversation
+    isExist.lastModify = new Date();
+    await isExist.save();
 
     res
       .status(201)
