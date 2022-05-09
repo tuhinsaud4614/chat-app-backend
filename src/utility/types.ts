@@ -1,6 +1,7 @@
 import * as yup from "yup";
 import { refreshTokenValidateSchema } from "../schema/auth.schema";
 import {
+  addMemberToGroupValidateSchema,
   AllConversationsValidateSchema,
   createGroupValidateSchema,
   singleConversationValidateSchema,
@@ -128,3 +129,11 @@ export type SeenByReqParams = yup.TypeOf<typeof seenByValidateSchema>["params"];
 export type CreateGroupReqBody = yup.TypeOf<
   typeof createGroupValidateSchema
 >["body"];
+
+export type AddMemberToGroupReqBody = yup.TypeOf<
+  typeof addMemberToGroupValidateSchema
+>["body"];
+
+export type AddMemberToGroupReqParams = yup.TypeOf<
+  typeof addMemberToGroupValidateSchema
+>["params"];

@@ -1,7 +1,7 @@
 import { RequestHandler } from "express";
+import mongoose from "mongoose";
 import { HttpError, HttpSuccess } from "../models";
-import ConversationModel from "../models/conversation.model";
-import ParticipantModel from "../models/participant.model";
+import ConversationModel, { Participant } from "../models/conversation.model";
 import UserModel from "../models/user.model";
 import {
   countConversations,
@@ -13,6 +13,8 @@ import {
   findMessagesWithConversation,
 } from "../services/message.service";
 import {
+  AddMemberToGroupReqBody,
+  AddMemberToGroupReqParams,
   AllConversationReqQuery,
   CreateGroupReqBody,
   GroupUserRole,
@@ -34,32 +36,26 @@ export const allConversations: RequestHandler<
   const page = +req.query.page!;
 
   try {
-    const tempCountConversations = await countConversations(userId!);
+    const totalConversations = await countConversations(userId!);
+    console.log(countConversations);
 
-    if (tempCountConversations[0] && "id" in tempCountConversations[0]) {
-      if (tempCountConversations[0].id < 1) {
-        return next(new HttpError("No conversation found", 404));
-      }
-
-      const totalConversations = tempCountConversations[0].id;
-
-      const conversations = await findConversations(userId, page, limit);
-
-      const result = new HttpSuccess("All the conversations", {
-        conversations,
-        totalConversations: totalConversations,
-        hasNext: limit * page! < totalConversations,
-        nextPage: page + 1,
-        previousPage: page - 1,
-        totalPages: Math.ceil(totalConversations / limit),
-      }).toObj();
-      res.status(200).json(result);
-      return;
+    if (totalConversations < 1) {
+      return next(new HttpError("No conversation found", 404));
     }
 
-    return next(new HttpError("Failed to get the conversations", 400));
+    const conversations = await findConversations(userId, page, limit, true);
+
+    const result = new HttpSuccess("All the conversations", {
+      conversations,
+      totalConversations: totalConversations,
+      hasNext: limit * page! < totalConversations,
+      nextPage: page + 1,
+      previousPage: page - 1,
+      totalPages: Math.ceil(totalConversations / limit),
+    }).toObj();
+    return res.status(200).json(result);
   } catch (error) {
-    return next(new HttpError("Failed to get all conversations", 400));
+    return next(new HttpError("Failed to get the conversations", 400));
   }
 };
 
@@ -85,7 +81,7 @@ export const singleConversation: RequestHandler<
 
     const countMessages = await countMessagesWithConversation(conversationId!);
     if (!countMessages) {
-      return next(new HttpError("No conversation found", 404));
+      return next(new HttpError("No message found for this conversation", 404));
     }
 
     const messages = await findMessagesWithConversation(
@@ -119,61 +115,102 @@ export const createGroup: RequestHandler<{}, {}, CreateGroupReqBody> = async (
   const { members, name } = req.body;
 
   try {
-    // const sess = await mongoose.startSession();
-
-    const adminParticipant = new ParticipantModel({
-      role: GroupUserRole.admin,
-      user: userId,
-    });
+    const sess = await mongoose.startSession();
 
     const conversation = new ConversationModel({
       name: name,
       isGroup: true,
-      participants: [adminParticipant],
+      participants: [{ role: GroupUserRole.admin, user: userId }],
     });
+
+    sess.startTransaction();
 
     for (let index = 0; index < members!.length; index++) {
       if (userId === members![index]) {
         continue;
       }
-      const participant = new ParticipantModel({
-        role: GroupUserRole.member,
-        user: members![index],
-      });
 
-      conversation.participants.push(participant);
-      await participant
-        .save
-        // { session: sess }
-        ();
+      conversation.participants.push({
+        role: GroupUserRole.member,
+        user: new mongoose.Types.ObjectId(members![index]!),
+      } as Participant);
     }
 
-    await adminParticipant.save();
-    await conversation
-      .save
-      // { session: sess }
-      ();
-    // await sess.commitTransaction();
-    // await sess.endSession();
+    // await adminParticipant.save({ session: sess });
+    // await conversation.save({ session: sess });
+    await conversation.save();
+    await sess.commitTransaction();
 
     const popConversation = await conversation.populate({
-      path: "participants",
-      select: "_id role user",
-      model: ParticipantModel,
-      populate: {
-        path: "user",
-        select: USER_POPULATE_SELECT,
-        model: UserModel,
-      },
+      path: "participants.user",
+      select: USER_POPULATE_SELECT,
+      model: UserModel,
     });
 
     const result = new HttpSuccess("Group created", {
-      popConversation,
+      ...popConversation,
     }).toObj();
     res.status(200).json(result);
   } catch (error) {
     console.log(error);
 
     return next(new HttpError("Failed to create group", 400));
+  }
+};
+
+export const addMembersToGroup: RequestHandler<
+  AddMemberToGroupReqParams,
+  {},
+  AddMemberToGroupReqBody
+> = async (req, res, next) => {
+  // @ts-ignore
+  const { id: userId } = req.user as IOmitUser;
+
+  const { members } = req.body;
+  const { conversationId } = req.params;
+
+  try {
+    const conversation = await findConversationById(conversationId!);
+
+    if (!conversation || !conversation.isGroup) {
+      return next(new HttpError("Conversation not exist", 404));
+    }
+
+    const isUserIndex = conversation.participants.findIndex(
+      (p) => p.user?.toString() === userId
+    );
+
+    // check is the current user exists in the conversation or the current user is only member
+    if (
+      isUserIndex === -1 ||
+      conversation.participants[isUserIndex].role === GroupUserRole.member
+    ) {
+      return next(new HttpError("You can't add member", 404));
+    }
+
+    members!.forEach((member) => {
+      // check is the current user already in the conversation or the member already in the conversation
+      if (
+        userId === member ||
+        conversation.participants.some((p) => p.user?.toString() === member)
+      ) {
+        return;
+      }
+
+      conversation.participants.push({
+        role: GroupUserRole.member,
+        user: new mongoose.Types.ObjectId(member),
+      } as Participant);
+    });
+
+    await conversation.save();
+
+    const result = new HttpSuccess("Group created", {
+      ...conversation.toObject(),
+    }).toObj();
+    res.status(200).json(result);
+  } catch (error) {
+    console.log(error);
+    return next(new HttpError("Failed to add members to group", 400));
   }
 };

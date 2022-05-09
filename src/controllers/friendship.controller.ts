@@ -2,7 +2,6 @@ import { mongoose } from "@typegoose/typegoose";
 import { RequestHandler } from "express";
 import { HttpError, HttpSuccess } from "../models";
 import ConversationModel from "../models/conversation.model";
-import ParticipantModel from "../models/participant.model";
 import { findFriendConversation } from "../services/conversation.service";
 import {
   createFriendship,
@@ -49,7 +48,14 @@ export const sendFriendRequest: RequestHandler<SendRequestReqParams> = async (
     const isExist = await isExistFriendship(senderId, receiverId!);
 
     if (isExist) {
-      return next(new HttpError("Already they are friend", 400));
+      if (isExist.accept) {
+        return next(new HttpError("Already they are friend", 400));
+      } else if (isExist.receiver === sender) {
+        return next(
+          new HttpError("He/She already sent you friend request", 400)
+        );
+      }
+      return next(new HttpError("Friend request already sent", 400));
     }
 
     const newFriendship = await createFriendship(senderId, receiverId!);
@@ -108,18 +114,11 @@ export const acceptFriendRequest: RequestHandler<
       );
     }
 
-    const senderParticipant = new ParticipantModel({
-      role: GroupUserRole.member,
-      user: senderId,
-    });
-
-    const receiverParticipant = new ParticipantModel({
-      role: GroupUserRole.member,
-      user: receiverId,
-    });
-
     const conversation = new ConversationModel({
-      participants: [senderParticipant, receiverParticipant],
+      participants: [
+        { role: GroupUserRole.member, user: senderId },
+        { role: GroupUserRole.member, user: receiverId },
+      ],
     });
     friendship.conversation = conversation;
 
@@ -129,8 +128,6 @@ export const acceptFriendRequest: RequestHandler<
         // Have to solve this error
         // await friendship.save({ session: sess });
         // await conversation.save({ session: sess });
-        await senderParticipant.save();
-        await receiverParticipant.save();
         await friendship.save();
         await conversation.save();
       });

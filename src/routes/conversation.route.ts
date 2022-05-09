@@ -1,5 +1,6 @@
 import { Router } from "express";
 import {
+  addMembersToGroup,
   allConversations,
   createGroup,
   singleConversation,
@@ -7,6 +8,7 @@ import {
 import { validateRequest } from "../middleware";
 import { verifyAccessToken } from "../middleware/auth.middleware";
 import {
+  addMemberToGroupValidateSchema,
   AllConversationsValidateSchema,
   createGroupValidateSchema,
   singleConversationValidateSchema,
@@ -26,6 +28,12 @@ router.post(
   "/create-group",
   validateRequest(createGroupValidateSchema, 422),
   createGroup
+);
+
+router.patch(
+  "/:conversationId/add-members",
+  validateRequest(addMemberToGroupValidateSchema, 422),
+  addMembersToGroup
 );
 
 router.get(

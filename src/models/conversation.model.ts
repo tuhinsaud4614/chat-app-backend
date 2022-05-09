@@ -5,7 +5,23 @@ import {
   Ref,
   Severity,
 } from "@typegoose/typegoose";
-import { Participant } from "./participant.model";
+import { GroupUserRole, IExtendedImage } from "../utility";
+import { User } from "./user.model";
+
+export class Participant {
+  @prop({
+    type: String,
+    enum: GroupUserRole,
+    default: "member",
+  })
+  public role: GroupUserRole;
+
+  @prop({ ref: () => User, required: true })
+  public user: Ref<User>;
+
+  @prop({ default: () => new Date() })
+  public joinedAt: Date;
+}
 
 @modelOptions({
   schemaOptions: {
@@ -17,14 +33,20 @@ import { Participant } from "./participant.model";
   },
 })
 export class Conversation {
-  @prop({ ref: () => Participant, required: true, default: [] })
-  public participants: Ref<Participant>[];
+  @prop({ type: () => Participant, required: true, default: [] })
+  public participants: Participant[];
 
   @prop({ default: null })
   public name: string | null;
 
   @prop({ default: false })
   public isGroup: boolean;
+
+  @prop({ default: null })
+  public avatar: IExtendedImage;
+
+  @prop({ default: () => new Date() })
+  public lastModify: Date;
 }
 
 const ConversationModel = getModelForClass(Conversation);
