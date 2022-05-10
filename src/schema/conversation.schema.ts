@@ -1,5 +1,6 @@
 import { mongoose } from "@typegoose/typegoose";
 import * as yup from "yup";
+import { GroupUserRole } from "../utility";
 
 export const AllConversationsValidateSchema = yup.object().shape({
   query: yup.object().shape({
@@ -104,6 +105,35 @@ export const removeMemberFromGroupValidateSchema = yup.object().shape({
         "validId",
         "Valid user id is required",
         (value) => !!value && mongoose.Types.ObjectId.isValid(value)
+      ),
+  }),
+  params: yup.object().shape({
+    conversationId: yup
+      .string()
+      .test(
+        "validId",
+        "Valid conversation id is required",
+        (value) => !!value && mongoose.Types.ObjectId.isValid(value)
+      ),
+  }),
+});
+
+export const promoteMemberFromGroupValidateSchema = yup.object().shape({
+  body: yup.object().shape({
+    member: yup
+      .string()
+      .required("Member is required")
+      .test(
+        "validId",
+        "Valid user id is required",
+        (value) => !!value && mongoose.Types.ObjectId.isValid(value)
+      ),
+    role: yup
+      .string()
+      .required("Member is required")
+      .oneOf(
+        [GroupUserRole.admin, GroupUserRole.moderator, GroupUserRole.member],
+        "Role should be admin or moderator or member"
       ),
   }),
   params: yup.object().shape({

@@ -20,6 +20,8 @@ import {
   ChangeGroupNameReqParams,
   CreateGroupReqBody,
   GroupUserRole,
+  PromoteMemberFromGroupReqBody,
+  PromoteMemberFromGroupReqParams,
   removeAllSpacesFromText,
   RemoveMemberToGroupReqBody,
   RemoveMemberToGroupReqParams,
@@ -257,14 +259,14 @@ export const removeMemberToGroup: RequestHandler<
 
       conversation.participants = restParticipants;
       await conversation.save();
-      const popConversation = await conversation.populate({
+      await conversation.populate({
         path: "participants.user",
         select: USER_POPULATE_SELECT,
         model: UserModel,
       });
 
       const result = new HttpSuccess("Remove member", {
-        ...popConversation.toObject(),
+        ...conversation.toObject(),
       }).toObj();
       res.status(200).json(result);
     } else {
@@ -273,6 +275,66 @@ export const removeMemberToGroup: RequestHandler<
   } catch (error) {
     console.log(error);
     return next(new HttpError("Failed to remove member to group", 400));
+  }
+};
+
+export const promoteMemberToGroup: RequestHandler<
+  PromoteMemberFromGroupReqParams,
+  {},
+  PromoteMemberFromGroupReqBody
+> = async (req, res, next) => {
+  // @ts-ignore
+  const { id: userId } = req.user as IOmitUser;
+
+  const { member, role } = req.body;
+  const { conversationId } = req.params;
+
+  try {
+    const conversation = await findConversationById(conversationId!);
+
+    if (!conversation || !conversation.isGroup) {
+      return next(new HttpError("Conversation not exist", 404));
+    }
+
+    const isUser = conversation.participants.find(
+      (p) => p.user?.toString() === userId
+    );
+    const currentMember = conversation.participants.find(
+      (p) => p.user?.toString() === member
+    );
+
+    // check is the current user exists in the conversation or the current user is only member
+    if (!isUser || !currentMember) {
+      return next(new HttpError("This member not exist", 404));
+    }
+
+    if (isUser.role !== GroupUserRole.admin) {
+      return next(new HttpError("You can't promote anyone", 400));
+    }
+
+    if (currentMember.role === (role! as GroupUserRole)) {
+      return next(new HttpError("The member already promoted", 400));
+    }
+
+    if (role === GroupUserRole.admin) {
+      // For reference type it will effect on the object
+      currentMember.role = GroupUserRole.admin;
+      isUser.role = GroupUserRole.moderator;
+    } else {
+      currentMember.role = role! as GroupUserRole;
+    }
+
+    await conversation.save();
+
+    const result = new HttpSuccess(
+      "Promote member",
+      { conversationId, member, role },
+      "You demoted as moderator and member promoted as admin"
+    ).toObj();
+    res.status(200).json(result);
+  } catch (error) {
+    console.log(error);
+    return next(new HttpError("Failed to promote member to group", 400));
   }
 };
 

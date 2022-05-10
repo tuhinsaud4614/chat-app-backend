@@ -4,6 +4,7 @@ import {
   allConversations,
   changeGroupName,
   createGroup,
+  promoteMemberToGroup,
   removeMemberToGroup,
   singleConversation,
 } from "../controllers/conversation.controller";
@@ -14,6 +15,7 @@ import {
   AllConversationsValidateSchema,
   changeGroupNameValidateSchema,
   createGroupValidateSchema,
+  promoteMemberFromGroupValidateSchema,
   removeMemberFromGroupValidateSchema,
   singleConversationValidateSchema,
 } from "../schema/conversation.schema";
@@ -50,6 +52,12 @@ router.delete(
   "/:conversationId/remove-member",
   validateRequest(removeMemberFromGroupValidateSchema, 422),
   removeMemberToGroup
+);
+
+router.patch(
+  "/:conversationId/promote-member",
+  validateRequest(promoteMemberFromGroupValidateSchema, 422),
+  promoteMemberToGroup
 );
 
 router.get(
