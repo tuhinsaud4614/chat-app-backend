@@ -54,6 +54,21 @@ export const createGroupValidateSchema = yup.object().shape({
   }),
 });
 
+export const changeGroupNameValidateSchema = yup.object().shape({
+  body: yup.object().shape({
+    name: yup.string().required("Name is required"),
+  }),
+  params: yup.object().shape({
+    conversationId: yup
+      .string()
+      .test(
+        "validId",
+        "Valid conversation id is required",
+        (value) => !!value && mongoose.Types.ObjectId.isValid(value)
+      ),
+  }),
+});
+
 export const addMemberToGroupValidateSchema = yup.object().shape({
   body: yup.object().shape({
     members: yup

@@ -75,19 +75,6 @@ export const removeDir = (location: string) => {
   }
 };
 
-export function omit<T extends object>(object: T, ...args: string[]) {
-  args.forEach((arg) => {
-    if (
-      typeof object === "object" &&
-      Object.prototype.hasOwnProperty.call(object, arg)
-    ) {
-      // @ts-ignore
-      delete object[arg];
-    }
-  });
-  return object;
-}
-
 export const getAttachmentExtAndDest = (mimetype: string) => {
   let ext = "";
   let dest = null;
@@ -113,3 +100,6 @@ export const getAttachmentExtAndDest = (mimetype: string) => {
     attachmentType,
   } as const;
 };
+
+export const removeAllSpacesFromText = (value: string) =>
+  value.replace(/\s+/g, "");

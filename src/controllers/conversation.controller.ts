@@ -16,8 +16,11 @@ import {
   AddMemberToGroupReqBody,
   AddMemberToGroupReqParams,
   AllConversationReqQuery,
+  ChangeGroupNameReqBody,
+  ChangeGroupNameReqParams,
   CreateGroupReqBody,
   GroupUserRole,
+  removeAllSpacesFromText,
   SingleConversationQuery,
   SingleConversationReqParams,
   USER_POPULATE_SELECT,
@@ -115,31 +118,24 @@ export const createGroup: RequestHandler<{}, {}, CreateGroupReqBody> = async (
   const { members, name } = req.body;
 
   try {
-    const sess = await mongoose.startSession();
-
     const conversation = new ConversationModel({
       name: name,
       isGroup: true,
       participants: [{ role: GroupUserRole.admin, user: userId }],
     });
 
-    sess.startTransaction();
-
-    for (let index = 0; index < members!.length; index++) {
-      if (userId === members![index]) {
-        continue;
+    members!.forEach((member) => {
+      if (userId === member) {
+        return;
       }
 
       conversation.participants.push({
         role: GroupUserRole.member,
-        user: new mongoose.Types.ObjectId(members![index]!),
+        user: new mongoose.Types.ObjectId(member),
       } as Participant);
-    }
+    });
 
-    // await adminParticipant.save({ session: sess });
-    // await conversation.save({ session: sess });
     await conversation.save();
-    await sess.commitTransaction();
 
     const popConversation = await conversation.populate({
       path: "participants.user",
@@ -212,5 +208,45 @@ export const addMembersToGroup: RequestHandler<
   } catch (error) {
     console.log(error);
     return next(new HttpError("Failed to add members to group", 400));
+  }
+};
+
+export const changeGroupName: RequestHandler<
+  ChangeGroupNameReqParams,
+  {},
+  ChangeGroupNameReqBody
+> = async (req, res, next) => {
+  // @ts-ignore
+  const { id: userId } = req.user as IOmitUser;
+  const { conversationId } = req.params;
+  const name = removeAllSpacesFromText(req.body.name!);
+
+  try {
+    const conversation = await findConversationById(conversationId!);
+
+    if (!conversation || !conversation.isGroup || !name) {
+      return next(new HttpError("Conversation not exist", 404));
+    }
+
+    const isUser = conversation.participants.find(
+      (p) => p.user?.toString() === userId
+    );
+
+    // check is the current user exists in the conversation or the current user is only member
+    if (!isUser || isUser.role === GroupUserRole.member) {
+      return next(new HttpError("You can't change the group name", 404));
+    }
+
+    conversation.name = name;
+    await conversation.save();
+
+    const result = new HttpSuccess("Group name updated", {
+      conversationId: conversationId,
+      name: name,
+    }).toObj();
+    res.status(200).json(result);
+  } catch (error) {
+    console.log(error);
+    return next(new HttpError("Failed to update group name", 400));
   }
 };

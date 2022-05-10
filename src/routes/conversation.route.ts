@@ -2,6 +2,7 @@ import { Router } from "express";
 import {
   addMembersToGroup,
   allConversations,
+  changeGroupName,
   createGroup,
   singleConversation,
 } from "../controllers/conversation.controller";
@@ -10,6 +11,7 @@ import { verifyAccessToken } from "../middleware/auth.middleware";
 import {
   addMemberToGroupValidateSchema,
   AllConversationsValidateSchema,
+  changeGroupNameValidateSchema,
   createGroupValidateSchema,
   singleConversationValidateSchema,
 } from "../schema/conversation.schema";
@@ -28,6 +30,12 @@ router.post(
   "/create-group",
   validateRequest(createGroupValidateSchema, 422),
   createGroup
+);
+
+router.patch(
+  "/:conversationId/change-group-name",
+  validateRequest(changeGroupNameValidateSchema, 422),
+  changeGroupName
 );
 
 router.patch(
