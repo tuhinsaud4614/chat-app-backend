@@ -94,3 +94,25 @@ export const addMemberToGroupValidateSchema = yup.object().shape({
       ),
   }),
 });
+
+export const removeMemberFromGroupValidateSchema = yup.object().shape({
+  body: yup.object().shape({
+    member: yup
+      .string()
+      .required("Member is required")
+      .test(
+        "validId",
+        "Valid user id is required",
+        (value) => !!value && mongoose.Types.ObjectId.isValid(value)
+      ),
+  }),
+  params: yup.object().shape({
+    conversationId: yup
+      .string()
+      .test(
+        "validId",
+        "Valid conversation id is required",
+        (value) => !!value && mongoose.Types.ObjectId.isValid(value)
+      ),
+  }),
+});

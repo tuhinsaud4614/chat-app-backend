@@ -120,5 +120,5 @@ export const findConversations = async (
 };
 
 export const findConversationById = async (id: string) => {
-  return ConversationModel.findById(id);
+  return ConversationModel.findById(id).exec();
 };

@@ -21,6 +21,8 @@ import {
   CreateGroupReqBody,
   GroupUserRole,
   removeAllSpacesFromText,
+  RemoveMemberToGroupReqBody,
+  RemoveMemberToGroupReqParams,
   SingleConversationQuery,
   SingleConversationReqParams,
   USER_POPULATE_SELECT,
@@ -136,16 +138,9 @@ export const createGroup: RequestHandler<{}, {}, CreateGroupReqBody> = async (
     });
 
     await conversation.save();
+    await conversation.populate("participants.user", USER_POPULATE_SELECT);
 
-    const popConversation = await conversation.populate({
-      path: "participants.user",
-      select: USER_POPULATE_SELECT,
-      model: UserModel,
-    });
-
-    const result = new HttpSuccess("Group created", {
-      ...popConversation,
-    }).toObj();
+    const result = new HttpSuccess("Group created", conversation).toObj();
     res.status(200).json(result);
   } catch (error) {
     console.log(error);
@@ -200,14 +195,84 @@ export const addMembersToGroup: RequestHandler<
     });
 
     await conversation.save();
+    await conversation.populate("participants.user", USER_POPULATE_SELECT);
 
-    const result = new HttpSuccess("Group created", {
-      ...conversation.toObject(),
-    }).toObj();
+    const result = new HttpSuccess("Members added", conversation).toObj();
     res.status(200).json(result);
   } catch (error) {
     console.log(error);
     return next(new HttpError("Failed to add members to group", 400));
+  }
+};
+
+export const removeMemberToGroup: RequestHandler<
+  RemoveMemberToGroupReqParams,
+  {},
+  RemoveMemberToGroupReqBody
+> = async (req, res, next) => {
+  // @ts-ignore
+  const { id: userId } = req.user as IOmitUser;
+
+  const { member } = req.body;
+  const { conversationId } = req.params;
+
+  try {
+    const conversation = await findConversationById(conversationId!);
+
+    if (!conversation || !conversation.isGroup) {
+      return next(new HttpError("Conversation not exist", 404));
+    }
+
+    const isUser = conversation.participants.find(
+      (p) => p.user?.toString() === userId
+    );
+
+    // check is the current user exists in the conversation or the current user is only member
+    if (!isUser) {
+      return next(new HttpError("User not exist", 404));
+    }
+
+    const currentMember = conversation.participants.find(
+      (p) => p.user?.toString() === member
+    );
+
+    if (!currentMember) {
+      return next(new HttpError("This member not exist", 404));
+    }
+
+    if (
+      // admin can remove member and moderator
+      (isUser.role === GroupUserRole.admin &&
+        (currentMember.role === GroupUserRole.moderator ||
+          currentMember.role === GroupUserRole.member)) ||
+      // moderator can remove itself and member
+      (isUser.role === GroupUserRole.moderator &&
+        currentMember.role === GroupUserRole.member) ||
+      // member or moderator can remove theme
+      (isUser.role !== GroupUserRole.admin && userId === member)
+    ) {
+      const restParticipants = conversation.participants.filter(
+        (p) => p.user?.toString() !== member
+      );
+
+      conversation.participants = restParticipants;
+      await conversation.save();
+      const popConversation = await conversation.populate({
+        path: "participants.user",
+        select: USER_POPULATE_SELECT,
+        model: UserModel,
+      });
+
+      const result = new HttpSuccess("Remove member", {
+        ...popConversation.toObject(),
+      }).toObj();
+      res.status(200).json(result);
+    } else {
+      return next(new HttpError("You can't remove member", 404));
+    }
+  } catch (error) {
+    console.log(error);
+    return next(new HttpError("Failed to remove member to group", 400));
   }
 };
 

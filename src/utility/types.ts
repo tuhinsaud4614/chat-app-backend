@@ -5,6 +5,7 @@ import {
   AllConversationsValidateSchema,
   changeGroupNameValidateSchema,
   createGroupValidateSchema,
+  removeMemberFromGroupValidateSchema,
   singleConversationValidateSchema,
 } from "../schema/conversation.schema";
 import {
@@ -137,6 +138,14 @@ export type AddMemberToGroupReqBody = yup.TypeOf<
 
 export type AddMemberToGroupReqParams = yup.TypeOf<
   typeof addMemberToGroupValidateSchema
+>["params"];
+
+export type RemoveMemberToGroupReqBody = yup.TypeOf<
+  typeof removeMemberFromGroupValidateSchema
+>["body"];
+
+export type RemoveMemberToGroupReqParams = yup.TypeOf<
+  typeof removeMemberFromGroupValidateSchema
 >["params"];
 
 export type ChangeGroupNameReqBody = yup.TypeOf<
