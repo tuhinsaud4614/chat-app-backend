@@ -1,8 +1,11 @@
 import { RequestHandler } from "express";
+import { omit } from "lodash";
 import mongoose from "mongoose";
+import path from "path";
 import { HttpError, HttpSuccess } from "../models";
 import ConversationModel, { Participant } from "../models/conversation.model";
 import UserModel from "../models/user.model";
+import { generateImages } from "../services/common.service";
 import {
   countConversations,
   findConversationById,
@@ -16,6 +19,7 @@ import {
   AddMemberToGroupReqBody,
   AddMemberToGroupReqParams,
   AllConversationReqQuery,
+  ChangeGroupAvatarReqParams,
   ChangeGroupNameReqBody,
   ChangeGroupNameReqParams,
   CreateGroupReqBody,
@@ -23,6 +27,7 @@ import {
   PromoteMemberFromGroupReqBody,
   PromoteMemberFromGroupReqParams,
   removeAllSpacesFromText,
+  removeDir,
   RemoveMemberToGroupReqBody,
   RemoveMemberToGroupReqParams,
   SingleConversationQuery,
@@ -370,6 +375,57 @@ export const changeGroupName: RequestHandler<
     const result = new HttpSuccess("Group name updated", {
       conversationId: conversationId,
       name: name,
+    }).toObj();
+    res.status(200).json(result);
+  } catch (error) {
+    console.log(error);
+    return next(new HttpError("Failed to update group name", 400));
+  }
+};
+
+export const changeGroupAvatar: RequestHandler<
+  ChangeGroupAvatarReqParams
+> = async (req, res, next) => {
+  // @ts-ignore
+  const { id: userId } = req.user as IOmitUser;
+  const { conversationId } = req.params;
+  const file = req.file;
+
+  try {
+    const images = await generateImages(file!);
+    const conversation = await findConversationById(conversationId!);
+
+    if (!conversation || !conversation.isGroup) {
+      const location = path.join(process.cwd(), "images", images.parentDir);
+      removeDir(location);
+      return next(new HttpError("Conversation not exist", 404));
+    }
+
+    const isUser = conversation.participants.find(
+      (p) => p.user?.toString() === userId
+    );
+
+    if (!isUser || isUser.role === GroupUserRole.member) {
+      const location = path.join(process.cwd(), "images", images.parentDir);
+      removeDir(location);
+      return next(new HttpError("You can't change the avatar", 404));
+    }
+
+    let previousAvatarDir = "";
+    if (conversation.avatar) {
+      previousAvatarDir = conversation.avatar.parentDir;
+    }
+
+    conversation.avatar = images;
+    await conversation.save();
+
+    if (previousAvatarDir) {
+      removeDir(path.join(process.cwd(), "images", previousAvatarDir));
+    }
+
+    const result = new HttpSuccess("Group name updated", {
+      conversationId: conversationId,
+      avatar: omit(conversation.avatar, "parentDir"),
     }).toObj();
     res.status(200).json(result);
   } catch (error) {

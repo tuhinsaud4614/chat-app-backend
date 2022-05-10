@@ -3,6 +3,7 @@ import { refreshTokenValidateSchema } from "../schema/auth.schema";
 import {
   addMemberToGroupValidateSchema,
   AllConversationsValidateSchema,
+  changeGroupAvatarValidateSchema,
   changeGroupNameValidateSchema,
   createGroupValidateSchema,
   promoteMemberFromGroupValidateSchema,
@@ -163,4 +164,8 @@ export type PromoteMemberFromGroupReqBody = yup.TypeOf<
 
 export type PromoteMemberFromGroupReqParams = yup.TypeOf<
   typeof promoteMemberFromGroupValidateSchema
+>["params"];
+
+export type ChangeGroupAvatarReqParams = yup.TypeOf<
+  typeof changeGroupAvatarValidateSchema
 >["params"];

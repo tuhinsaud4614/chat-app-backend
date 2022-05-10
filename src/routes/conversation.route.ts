@@ -2,6 +2,7 @@ import { Router } from "express";
 import {
   addMembersToGroup,
   allConversations,
+  changeGroupAvatar,
   changeGroupName,
   createGroup,
   promoteMemberToGroup,
@@ -10,15 +11,18 @@ import {
 } from "../controllers/conversation.controller";
 import { validateRequest } from "../middleware";
 import { verifyAccessToken } from "../middleware/auth.middleware";
+import { imageUpload } from "../middleware/file.middleware";
 import {
   addMemberToGroupValidateSchema,
   AllConversationsValidateSchema,
+  changeGroupAvatarValidateSchema,
   changeGroupNameValidateSchema,
   createGroupValidateSchema,
   promoteMemberFromGroupValidateSchema,
   removeMemberFromGroupValidateSchema,
   singleConversationValidateSchema,
 } from "../schema/conversation.schema";
+import { maxFileSize } from "../utility";
 
 const router = Router();
 
@@ -58,6 +62,13 @@ router.patch(
   "/:conversationId/promote-member",
   validateRequest(promoteMemberFromGroupValidateSchema, 422),
   promoteMemberToGroup
+);
+
+router.patch(
+  "/:conversationId/change-group-avatar",
+  imageUpload(maxFileSize(5)).single("avatar"),
+  validateRequest(changeGroupAvatarValidateSchema, 422),
+  changeGroupAvatar
 );
 
 router.get(

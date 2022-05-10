@@ -146,3 +146,16 @@ export const promoteMemberFromGroupValidateSchema = yup.object().shape({
       ),
   }),
 });
+
+export const changeGroupAvatarValidateSchema = yup.object().shape({
+  file: yup.mixed().required("Avatar is required"),
+  params: yup.object().shape({
+    conversationId: yup
+      .string()
+      .test(
+        "validId",
+        "Valid conversation id is required",
+        (value) => !!value && mongoose.Types.ObjectId.isValid(value)
+      ),
+  }),
+});
